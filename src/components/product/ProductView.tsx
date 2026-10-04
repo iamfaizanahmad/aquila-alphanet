@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Box, Caption, Check, Heading, Part, Ruled, btnInk, btnOutline, btnPaper } from "@/components/form";
+import { Glass, Heading, Section, btnGhost, btnPrimary } from "@/components/ui";
 import { PRODUCTS, PRODUCT_INK, PRODUCT_LINKS, type ProductKey } from "@/content/products";
 
-/** One template for all five products (design: Product.dc.html), printed in the product's own form ink. */
+/** One template for all five products (design: Product.dc.html); the product colour comes in via --accent. */
 export function ProductView({ productKey }: { productKey: ProductKey }) {
   const p = PRODUCTS[productKey];
   const ink = PRODUCT_INK[productKey];
@@ -21,75 +21,66 @@ export function ProductView({ productKey }: { productKey: ProductKey }) {
   const others = PRODUCT_LINKS.filter((l) => l.key !== productKey);
 
   return (
-    <div style={{ ["--form" as string]: ink.ink, ["--form-tint" as string]: ink.tint }}>
-      {/* Hero form */}
-      <section className="px-gutter pt-6 pb-16 sm:pt-8">
-        <div className="sheet lg:px-14">
-          <nav aria-label="Breadcrumb" className="caption flex items-center gap-2 pb-3 text-[13px]">
-            <Link href="/#products" className="underline-offset-4 hover:underline">
-              Our Products
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-semibold">{p.name}</span>
-          </nav>
-          <Ruled className="border-t-2 lg:grid-cols-12">
-            <Box caption="Product" className="bg-form-tint lg:col-span-8">
-              <h1 className="m-0 mt-3 text-[clamp(44px,6.4vw,96px)] leading-[.9] font-black tracking-[-.02em] text-ink uppercase stretch-display">
-                {p.name}
-              </h1>
-              <p className="mt-5 mb-0 max-w-[38ch] text-[clamp(19px,1.9vw,24px)] leading-[1.3] font-bold text-form stretch-head">{p.tagline}</p>
-            </Box>
+    <div style={{ ["--accent" as string]: ink.ink }}>
+      {/* soft accent glow behind the hero */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[720px]" style={{ background: `radial-gradient(700px 420px at 80% 0%, ${ink.tint.replace(".10", ".22")}, transparent 70%)` }} />
 
-            <Box caption="Platform map" className="lg:col-span-4 lg:row-span-3">
-              <div className="mt-1 font-mono text-[12px] text-muted">{titles.length} modules</div>
-              <ul className="m-0 mt-3 grid list-none gap-x-4 gap-y-1.5 p-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {titles.map((t) => (
-                  <li key={t} className="flex items-start gap-2 text-[13px] leading-[1.35] text-ink">
-                    <Check on className="mt-[1px]" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-5 flex flex-wrap gap-2 border-t border-dashed border-form pt-4">
-                {p.badges.map((b) => (
-                  <span key={b} className="border border-form px-2 py-0.5 font-mono text-[12px] text-ink">
-                    {b}
-                  </span>
-                ))}
-              </div>
-            </Box>
+      <Section label={p.name} className="relative pt-12">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-muted">
+          <Link href="/#products" className="hover:text-text">
+            Our Products
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-text">{p.name}</span>
+        </nav>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
+          <div>
+            <h1 className="m-0 font-display text-[clamp(36px,4.8vw,68px)] leading-[1.02] font-semibold tracking-[-.03em] text-text">{p.name}</h1>
+            <p className="mt-5 mb-0 max-w-[40ch] text-[clamp(18px,1.7vw,22px)] leading-[1.35] font-medium text-accent">{p.tagline}</p>
+            {p.intro.map((para) => (
+              <p key={para} className="mt-4 mb-0 max-w-[64ch] text-[16px] leading-[1.7] text-body">
+                {para}
+              </p>
+            ))}
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/contact" className={btnPrimary}>
+                Request a Demo
+              </Link>
+              <a href="#features" className={btnGhost}>
+                Explore features ↓
+              </a>
+            </div>
+          </div>
 
-            <Box caption="Description" className="lg:col-span-8">
-              {p.intro.map((para) => (
-                <p key={para} className="mt-3 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-graphite">
-                  {para}
-                </p>
+          <Glass className="p-5 sm:p-6">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[15.5px] font-semibold text-text">Platform map</span>
+              <span className="hud">{titles.length} modules</span>
+            </div>
+            <ul className="m-0 mt-4 grid list-none gap-x-4 gap-y-2 p-0 sm:grid-cols-2">
+              {titles.map((t) => (
+                <li key={t} className="flex items-start gap-2 text-[13.5px] leading-[1.35] text-text">
+                  <span aria-hidden="true" className="mt-[5px] h-1.5 w-1.5 flex-none rounded-full bg-accent shadow-[0_0_8px_var(--accent)]" />
+                  {t}
+                </li>
               ))}
-            </Box>
-            <Box caption="Next action" className="lg:col-span-8">
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Link href="/contact" className={btnInk}>
-                  Request a Demo
-                </Link>
-                <a href="#features" className={btnOutline}>
-                  Explore features ↓
-                </a>
-              </div>
-            </Box>
-          </Ruled>
+            </ul>
+            <div className="mt-5 flex flex-wrap gap-2 border-t border-holo/10 pt-4">
+              {p.badges.map((b) => (
+                <span key={b} className="rounded-full border border-holo/20 px-2.5 py-1 font-mono text-[11px] text-body">
+                  {b}
+                </span>
+              ))}
+            </div>
+          </Glass>
         </div>
-      </section>
+      </Section>
 
-      {/* Capabilities */}
-      <Part id="features" label="Capabilities" className="pb-16">
+      <Section id="features" label="Capabilities" className="pt-20">
         <Heading>Everything inside {p.name}</Heading>
 
         {all.length > 1 && (
-          <div
-            role="tablist"
-            aria-label="Capability categories"
-            className="sticky top-16 z-20 mt-6 flex flex-wrap border-t-2 border-l border-form bg-paper"
-          >
+          <div role="tablist" aria-label="Capability categories" className="glass sticky top-[72px] z-20 mt-6 flex flex-wrap gap-1 rounded-[16px] bg-void/70 p-1.5">
             {tabs.map((t) => {
               const on = t.label === tab;
               return (
@@ -99,12 +90,10 @@ export function ProductView({ productKey }: { productKey: ProductKey }) {
                   role="tab"
                   aria-selected={on}
                   onClick={() => setTab(t.label)}
-                  className={`flex flex-1 items-center justify-center gap-2 border-r border-b border-form px-3 py-2.5 text-[15px] font-bold whitespace-nowrap stretch-head ${
-                    on ? "bg-ink text-white" : "text-ink hover:bg-form-tint"
-                  }`}
+                  className={`flex items-center gap-2 rounded-[11px] px-3.5 py-2 text-[14.5px] font-medium whitespace-nowrap ${on ? "bg-accent text-void" : "text-body hover:bg-holo/5 hover:text-text"}`}
                 >
                   {t.label}
-                  <span className={`font-mono text-[11.5px] font-medium ${on ? "text-white/70" : "text-form"}`}>{t.count}</span>
+                  <span className={`font-mono text-[11px] ${on ? "text-void/70" : "text-muted"}`}>{t.count}</span>
                 </button>
               );
             })}
@@ -113,82 +102,69 @@ export function ProductView({ productKey }: { productKey: ProductKey }) {
 
         {sections.map((s) => (
           <div key={s.cat} className="mt-10">
-            <Heading as="h3" className="!text-[clamp(24px,2.6vw,34px)]">
+            <Heading as="h3" className="!text-[clamp(22px,2.2vw,28px)]">
               {s.cat}
             </Heading>
-            {s.d && <p className="mt-2 mb-0 max-w-[72ch] text-[16px] leading-[1.65] text-graphite">{s.d}</p>}
-            <Ruled className="mt-5 md:grid-cols-2 xl:grid-cols-3">
+            {s.d && <p className="mt-2 mb-0 max-w-[72ch] text-[16px] leading-[1.65] text-body">{s.d}</p>}
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {s.groups.map((g) => (
-                <div key={g.t} className="flex flex-col p-4 sm:p-5">
-                  <h4 className="m-0 text-[20px] leading-[1.15] font-extrabold text-ink stretch-head">{g.t}</h4>
-                  {g.d && <p className="mt-2 mb-0 text-[14.5px] leading-[1.6] text-graphite">{g.d}</p>}
-                  <ul className="m-0 mt-4 flex-1 list-none space-y-1.5 p-0">
+                <Glass key={g.t} className="flex flex-col p-5 sm:p-6">
+                  <h4 className="m-0 text-[18.5px] leading-[1.25] font-semibold tracking-[-.01em] text-text">{g.t}</h4>
+                  {g.d && <p className="mt-2 mb-0 text-[14.5px] leading-[1.6] text-body">{g.d}</p>}
+                  <ul className="m-0 mt-4 flex-1 list-none space-y-2 p-0">
                     {g.items.map((it) => (
-                      <li key={it} className="flex items-start gap-2.5 font-mono text-[13px] leading-[1.5] text-ink">
-                        <Check on className="mt-[2px]" />
+                      <li key={it} className="flex items-start gap-2.5 text-[14px] leading-[1.45] text-text">
+                        <span aria-hidden="true" className="mt-[7px] h-1 w-3 flex-none rounded-full bg-accent" />
                         {it}
                       </li>
                     ))}
                   </ul>
-                  {g.note && (
-                    <p className="mt-4 mb-0 border-t border-dashed border-form pt-3 text-[13.5px] leading-[1.6] text-muted">
-                      {g.note}
-                    </p>
-                  )}
-                </div>
+                  {g.note && <p className="mt-4 mb-0 border-t border-holo/10 pt-3 text-[13.5px] leading-[1.6] text-muted">{g.note}</p>}
+                </Glass>
               ))}
-            </Ruled>
-          </div>
-        ))}
-      </Part>
-
-      {/* Closing statement */}
-      <section className="px-gutter pb-16">
-        <div className="sheet lg:px-14">
-          <div className="bg-ink p-6 text-white sm:p-10">
-            <Caption className="!text-white/70 text-[13px]">{p.closingKicker}</Caption>
-            {p.closing.map((cl) => (
-              <p key={cl} className="mt-4 mb-0 max-w-[60ch] text-[clamp(19px,2vw,26px)] leading-[1.4] font-semibold text-pretty stretch-head">
-                {cl}
-              </p>
-            ))}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/contact" className={`${btnPaper} focus-visible:outline-white`}>
-                Request a Demo
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center rounded-[3px] border-2 border-white/60 px-6 py-3 text-[16px] font-bold text-white stretch-head hover:border-white focus-visible:outline-white"
-              >
-                Talk to our team
-              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        ))}
+      </Section>
 
-      {/* Cross-links */}
-      <Part label="More from AlphaNet">
+      <Section label={p.closingKicker} className="pt-20">
+        <Glass className="p-7 sm:p-10">
+          {p.closing.map((cl) => (
+            <p key={cl} className="m-0 max-w-[60ch] text-[clamp(18px,1.9vw,24px)] leading-[1.45] font-medium text-pretty text-text [&+p]:mt-4">
+              {cl}
+            </p>
+          ))}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/contact" className={btnPrimary}>
+              Request a Demo
+            </Link>
+            <Link href="/contact" className={btnGhost}>
+              Talk to our team
+            </Link>
+          </div>
+        </Glass>
+      </Section>
+
+      <Section label="More from AlphaNet" className="pt-20">
         <Heading as="h3">More from AlphaNet</Heading>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {others.map((o) => {
-            const oi = PRODUCT_INK[o.key];
+            const oi = PRODUCT_INK[o.key].ink;
             return (
-              <Link
-                key={o.key}
-                href={o.href}
-                className="group flex flex-col border-2 bg-paper p-4 hover:bg-[var(--form-tint)] sm:p-5"
-                style={{ borderColor: oi.ink, ["--form" as string]: oi.ink, ["--form-tint" as string]: oi.tint }}
-              >
-                <Caption>Product</Caption>
-                <span className="mt-2 text-[19px] leading-tight font-extrabold text-ink stretch-head">{PRODUCTS[o.key].name}</span>
-                <span className="mt-2 text-[14px] leading-[1.55] text-graphite">{o.tag}</span>
-                <span className="mt-auto pt-4 text-[14.5px] font-bold text-form underline-offset-4 group-hover:underline">View product</span>
+              <Link key={o.key} href={o.href} className="group">
+                <Glass className="flex h-full flex-col p-5 group-hover:border-holo/50">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: oi, boxShadow: `0 0 12px ${oi}` }} />
+                  <span className="mt-4 text-[17.5px] leading-tight font-semibold text-text">{PRODUCTS[o.key].name}</span>
+                  <span className="mt-2 text-[14px] leading-[1.55] text-body">{o.tag}</span>
+                  <span className="mt-auto pt-4 text-[14.5px] font-semibold group-hover:underline" style={{ color: oi }}>
+                    View product
+                  </span>
+                </Glass>
               </Link>
             );
           })}
         </div>
-      </Part>
+      </Section>
     </div>
   );
 }

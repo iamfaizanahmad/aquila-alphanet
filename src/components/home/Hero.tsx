@@ -1,173 +1,305 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Box, Caption, Check, Flag, Ruled, Stamp, btnInk, btnOutline } from "@/components/form";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pill, btnGhost, btnPrimary } from "@/components/ui";
+import type { LaunchScene } from "@/components/launch/engine";
 
 /*
- * The page's one orchestrated moment: the headline types into box 19, the claim is
- * transmitted as an 837P, the 999 / 277CA / 835 acknowledgements tick, then PAID.
+ * Homepage hero: "The Architecture Blueprint to Living Ecosystem". A 3D healthcare
+ * city is mapped, designed, engineered, tested and launched as the visitor scrolls.
+ * The WebGL scene lives in components/launch/engine.ts; this file pins it, feeds it
+ * scroll progress, and lays the copy over it.
  */
-const H1A = "We Don't Just Build Software.";
-const H1B = "We Build Digital Market Leaders.";
-const HEADLINE = `${H1A} ${H1B}`;
-const TYPE_MS = 26;
 
-const EDI = [
-  "ST*837*0001*005010X222A1~",
-  "BHT*0019*00*AN0001*20261004*1015*CH~",
-  "NM1*85*2*ALPHANET SOLUTIONS*****XX*1234567893~",
-  "CLM*AN-2014*250***11:B:1*Y*A*Y*Y~",
-  "SV1*HC:99213*250*UN*1***1~",
-  "SE*6*0001~",
+const clamp = (v: number) => Math.min(1, Math.max(0, v));
+const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
+
+// Mirrors STEPS in engine.ts (kept here so the copy can render before three.js loads).
+const STEPS: [number, number][] = [
+  [0.06, 0.24],
+  [0.24, 0.42],
+  [0.42, 0.62],
+  [0.62, 0.8],
+  [0.8, 1],
 ];
-const ACKS = [
-  ["999", "Batch accepted"],
-  ["277CA", "Claim accepted"],
-  ["835", "Payment posted"],
+
+const STEP_COPY = [
+  { name: "Requirement Gathering", line: "We listen & map your vision." },
+  { name: "Design", line: "Crafting intuitive & stunning user experiences." },
+  { name: "Development", line: "Clean, scalable, and high-performance code." },
+  { name: "Quality Assurance (QA)", line: "Rigorous testing for ironclad reliability." },
+  { name: "Deployment", line: "" },
 ];
-const STATS = [
-  { v: "11+", l: "Years Exp" },
-  { v: "99.8%", l: "Client Retention" },
-  { v: "50+", l: "Enterprise Apps Delivered" },
-  { v: "5", l: "In-house Products" },
-];
+
+function LandingCopy() {
+  return (
+    <>
+      <h1 className="m-0 font-display text-[clamp(34px,4.4vw,62px)] leading-[1.04] font-semibold tracking-[-.03em] text-text">
+        We Don&apos;t Just Build Software. We Build Digital Market Leaders.
+      </h1>
+      <p className="mt-6 mb-0 text-[clamp(18px,1.5vw,21px)] leading-snug font-medium text-holo">Your Partner in Innovative Software Solutions</p>
+      <p className="mt-3 mb-0 max-w-[54ch] text-[15.5px] leading-[1.65] text-body">
+        At AlphaNet Solutions, we are dedicated to transforming your ideas into reality through cutting-edge technology and
+        expert craftsmanship. With over 11+ years of experience in the software and IT industry, we provide a comprehensive
+        suite of services designed to meet the diverse needs of our clients.
+      </p>
+      <div className="mt-7 flex flex-wrap gap-3">
+        <a href="#estimate" className={btnPrimary}>
+          Launch Your Project
+        </a>
+        <Link href="/products/aquila-ehr" className={btnGhost}>
+          Explore AquilaEHR <Pill>Flagship</Pill>
+        </Link>
+      </div>
+    </>
+  );
+}
 
 export function Hero() {
-  const [typed, setTyped] = useState(0);
-  const [edi, setEdi] = useState(0);
-  const [acks, setAcks] = useState(0);
-  const [stamped, setStamped] = useState(false);
-
+  const [mode, setMode] = useState<"journey" | "static">("journey");
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      setTyped(HEADLINE.length);
-      setEdi(EDI.length);
-      setAcks(ACKS.length);
-      setStamped(true);
-      return;
-    }
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
-    const start = 450;
-    for (let i = 1; i <= HEADLINE.length; i++) at(start + i * TYPE_MS, () => setTyped(i));
-    const t1 = start + HEADLINE.length * TYPE_MS + 250;
-    EDI.forEach((_, i) => at(t1 + i * 170, () => setEdi(i + 1)));
-    const t2 = t1 + EDI.length * 170 + 200;
-    ACKS.forEach((_, i) => at(t2 + i * 380, () => setAcks(i + 1)));
-    at(t2 + ACKS.length * 380 + 150, () => setStamped(true));
-    return () => timers.forEach(clearTimeout);
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) setMode("static");
   }, []);
+  // stable identity: Journey's effect depends on it and must not re-run (it owns the WebGL scene)
+  const unsupported = useCallback(() => setMode("static"), []);
+  return mode === "static" ? <StaticHero /> : <Journey onUnsupported={unsupported} />;
+}
 
-  const typing = typed < HEADLINE.length;
-  const lineA = HEADLINE.slice(0, Math.min(typed, H1A.length));
-  const lineB = typed > H1A.length + 1 ? HEADLINE.slice(H1A.length + 1, typed) : "";
-
+/** Reduced motion / no WebGL: one still frame of the lit city, no pinning, no camera moves. */
+function StaticHero() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    let scene: LaunchScene | null = null;
+    let cancelled = false;
+    import("@/components/launch/engine")
+      .then(({ LaunchScene }) => {
+        if (cancelled || !ref.current) return;
+        try {
+          scene = new LaunchScene(ref.current, { lowPower: true });
+          const r = ref.current.getBoundingClientRect();
+          scene.setSize(r.width, r.height, 0);
+          scene.setProgress(0.85);
+        } catch {
+          /* no WebGL: the copy below still stands on its own */
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      scene?.dispose();
+    };
+  }, []);
   return (
-    <section className="px-gutter pt-6 pb-16 sm:pt-8">
-      <div className="sheet lg:px-14">
-        <div className="flex flex-wrap items-end justify-between gap-4 pb-3">
-          <div>
-            <div className="text-[26px] leading-none font-extrabold text-form stretch-display sm:text-[30px]">Health insurance claim form</div>
-            <Caption className="mt-1.5">Approved by National Uniform Claim Committee (NUCC) 02/12</Caption>
-          </div>
-          <div className="caption flex flex-wrap gap-x-4 gap-y-1" aria-hidden="true">
-            {["Medicare", "Medicaid", "Tricare", "Group health plan", "Other"].map((l) => (
-              <span key={l} className="inline-flex items-center gap-1.5">
-                <Check on={l === "Group health plan"} />
-                {l}
-              </span>
-            ))}
-          </div>
+    <section className="px-gutter pt-10">
+      <div className="sheet grid gap-10 lg:grid-cols-2 lg:items-center lg:px-8">
+        <div>
+          <LandingCopy />
         </div>
-
-        <Ruled className="border-t-2 lg:grid-cols-12">
-          <Box n="1a" caption="Insured's ID number" className="lg:col-span-4">
-            <div className="mt-1 font-mono text-[15px]">AN-2014-0001</div>
-          </Box>
-          <Box n="2" caption="Patient's name" className="lg:col-span-4">
-            <div className="mt-1 font-mono text-[15px]">Your practice</div>
-          </Box>
-          <Box n="33" caption="Billing provider info & ph #" className="lg:col-span-4">
-            <div className="mt-1 font-mono text-[13px] leading-snug">AlphaNet Solutions – HASH LLC, Kalispell MT 59901 (914)898-9007</div>
-          </Box>
-
-          <Box n="19" caption="Additional claim information" className="bg-form-tint lg:col-span-8">
-            <h1
-              aria-label={HEADLINE}
-              className="m-0 mt-3 text-[clamp(42px,6.2vw,92px)] leading-[.9] font-black tracking-[-.02em] text-ink uppercase stretch-display"
-            >
-              <span aria-hidden="true" className="block">
-                {lineA}
-                {typing && typed <= H1A.length && <Caret />}
-              </span>
-              <span aria-hidden="true" className="block">
-                {lineB}
-                {typing && typed > H1A.length && <Caret />}
-                {!lineB && <span className="invisible">W</span>}
-              </span>
-            </h1>
-          </Box>
-
-          <Box n="837P" caption="Electronic claim transmission" className="lg:col-span-4">
-            <div aria-hidden="true" className="mt-3 min-h-[132px] font-mono text-[11.5px] leading-[1.75] break-all">
-              {EDI.slice(0, edi).map((l) => (
-                <div key={l} className="animate-[typeIn_.25s_ease-out]">
-                  {l}
-                </div>
-              ))}
-            </div>
-            <div aria-hidden="true" className="mt-4 space-y-1.5 border-t border-dashed border-form pt-3 font-mono text-[12.5px]">
-              {ACKS.map(([code, text], i) => (
-                <div key={code} className="flex items-center gap-3">
-                  <span
-                    className="grid h-4 w-4 place-items-center border border-form text-[11px] text-white transition-colors"
-                    style={{ background: i < acks ? "#1B7A4B" : "transparent" }}
-                  >
-                    {i < acks ? "✓" : ""}
-                  </span>
-                  <span className="w-12 font-semibold">{code}</span>
-                  <span className={i < acks ? "" : "opacity-35"}>{text}</span>
-                </div>
-              ))}
-            </div>
-            {stamped && <Stamp label="PAID" sub="835 ERA" className="mt-6 ml-auto" />}
-          </Box>
-
-          <Box n="21" caption="Nature of the engagement" className="lg:col-span-7 xl:col-span-6">
-            <p className="mt-2 mb-0 text-[22px] leading-tight font-bold stretch-head">Your Partner in Innovative Software Solutions</p>
-            <p className="mt-3 mb-0 max-w-[62ch] text-[15.5px] leading-[1.65] text-graphite">
-              At AlphaNet Solutions, we are dedicated to transforming your ideas into reality through cutting-edge
-              technology and expert craftsmanship. With over 11+ years of experience in the software and IT industry, we
-              provide a comprehensive suite of services designed to meet the diverse needs of our clients.
-            </p>
-          </Box>
-          <Box n="24" caption="Next action" className="flex flex-col lg:col-span-5 xl:col-span-6">
-            <div className="mt-4 flex flex-1 flex-wrap content-end items-end gap-3 [&>*]:whitespace-nowrap">
-              <a href="#estimate" className={btnInk}>
-                Launch Your Project
-              </a>
-              <Link href="/products/aquila-ehr" className={btnOutline}>
-                Explore AquilaEHR <Flag>Flagship</Flag>
-              </Link>
-            </div>
-          </Box>
-
-          {STATS.map((s) => (
-            <Box key={s.l} caption={s.l} className="lg:col-span-3">
-              <div className="mt-1 font-mono text-[clamp(26px,2.6vw,36px)] font-semibold">{s.v}</div>
-            </Box>
-          ))}
-        </Ruled>
-        <div className="caption mt-2 flex justify-between gap-4 text-[10.5px]">
-          <span>NUCC instruction manual available at: www.nucc.org</span>
-          <span>Form CMS-1500 (02-12)</span>
-        </div>
+        <canvas ref={ref} aria-hidden="true" className="h-[380px] w-full rounded-[18px] border border-holo/15 bg-void" />
       </div>
+      <ol className="sheet m-0 mt-10 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-5 lg:px-8">
+        {STEP_COPY.map((s, i) => (
+          <li key={s.name} className="glass rounded-[14px] p-4">
+            <div className="hud">Step {String(i + 1).padStart(2, "0")}</div>
+            <div className="mt-1 text-[16px] font-semibold text-text">{s.name}</div>
+            {s.line && <p className="mt-1.5 mb-0 text-[14px] leading-[1.5] text-body">{s.line}</p>}
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
 
-function Caret() {
-  return <span className="ml-1 inline-block h-[.8em] w-[.08em] translate-y-[.06em] animate-[caret_.9s_steps(1)_infinite] bg-form" />;
+function Journey({ onUnsupported }: { onUnsupported: () => void }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<LaunchScene | null>(null);
+  const [p, setP] = useState(0);
+  const [w, setW] = useState(1280);
+
+  useEffect(() => {
+    let cancelled = false;
+    let raf = 0;
+    let cleanupIO = () => {};
+    const desktop = () => window.innerWidth >= 1024;
+
+    const progress = () => {
+      const el = trackRef.current;
+      const st = stageRef.current;
+      if (!el || !st) return 0;
+      const total = el.offsetHeight - st.offsetHeight;
+      return total > 0 ? clamp((st.getBoundingClientRect().top - el.getBoundingClientRect().top) / total) : 0;
+    };
+    const update = () => {
+      raf = 0;
+      const v = progress();
+      setP(v);
+      sceneRef.current?.setProgress(v);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    const resize = () => {
+      const st = stageRef.current;
+      if (!st) return;
+      const r = st.getBoundingClientRect();
+      setW(r.width);
+      sceneRef.current?.setSize(r.width, r.height, desktop() ? r.width * 0.17 : 0);
+    };
+
+    import("@/components/launch/engine")
+      .then(({ LaunchScene }) => {
+        if (cancelled || !canvasRef.current) return;
+        try {
+          sceneRef.current = new LaunchScene(canvasRef.current, { lowPower: window.innerWidth < 768 });
+        } catch {
+          onUnsupported();
+          return;
+        }
+        resize();
+        update();
+        // render only while the journey is on screen
+        const io = new IntersectionObserver(([e]) => (e.isIntersecting ? sceneRef.current?.start() : sceneRef.current?.stop()));
+        if (trackRef.current) io.observe(trackRef.current);
+        cleanupIO = () => io.disconnect();
+      })
+      .catch(() => onUnsupported());
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", resize);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      cleanupIO();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", resize);
+      sceneRef.current?.dispose();
+      sceneRef.current = null;
+    };
+  }, [onUnsupported]);
+
+  const desktop = w >= 1024;
+  const step = p < STEPS[0][0] ? -1 : STEPS.findIndex(([a, b], i) => p >= a && (p < b || i === STEPS.length - 1));
+  const landing = 1 - seg(p, 0.03, 0.07);
+
+  const jumpTo = (i: number) => {
+    const el = trackRef.current;
+    const st = stageRef.current;
+    if (!el || !st) return;
+    const total = el.offsetHeight - st.offsetHeight;
+    const top = el.getBoundingClientRect().top + window.scrollY - 64;
+    const [a, b] = STEPS[i];
+    window.scrollTo({ top: top + total * (a + (b - a) * (i === 4 ? 0.9 : 0.6)), behavior: "smooth" });
+  };
+
+  return (
+    <section aria-label="Introduction">
+      <div ref={trackRef} className="relative h-[780vh]">
+        <div ref={stageRef} className="sticky top-16 h-[calc(100svh-64px)] overflow-hidden bg-void">
+          <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          {/* soft vignette keeps copy legible over the scene */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: desktop
+                ? "linear-gradient(90deg, rgba(4,6,11,.92) 0%, rgba(4,6,11,.55) 34%, rgba(4,6,11,0) 55%)"
+                : "linear-gradient(0deg, rgba(4,6,11,.9) 0%, rgba(4,6,11,0) 45%)",
+              opacity: step === 4 ? 0 : 1,
+              transition: "opacity .4s",
+            }}
+          />
+
+          {/* landing */}
+          <div
+            className="absolute inset-x-0 top-0 px-gutter pt-[clamp(28px,9vh,110px)]"
+            style={{ opacity: landing, transform: `translateY(${(1 - landing) * -20}px)`, pointerEvents: landing > 0.5 ? "auto" : "none" }}
+          >
+            <div className="sheet lg:px-8">
+              <div className={`max-w-[580px] ${desktop ? "" : "glass rounded-[16px] bg-void/60 p-5"}`}>
+                <LandingCopy />
+              </div>
+            </div>
+          </div>
+          <div aria-hidden="true" className="hud absolute bottom-6 left-1/2 -translate-x-1/2 transition-opacity duration-300" style={{ opacity: p < 0.015 ? 0.9 : 0 }}>
+            Scroll to start the build ↓
+          </div>
+
+          {/* steps 1–4: narration */}
+          {STEP_COPY.slice(0, 4).map((s, i) => {
+            const [a, b] = STEPS[i];
+            const vis = seg(p, a, a + 0.02) * (1 - seg(p, b - 0.02, b));
+            return (
+              <div
+                key={s.name}
+                className="pointer-events-none absolute inset-x-0 px-gutter max-lg:bottom-20 lg:top-1/2 lg:-translate-y-1/2"
+                style={{ opacity: vis }}
+                aria-hidden={vis < 0.5}
+              >
+                <div className="sheet lg:px-8">
+                  <div className="glass max-w-[460px] rounded-[18px] bg-void/40 p-6" style={{ transform: `translateY(${(1 - vis) * 16}px)` }}>
+                    <div className="hud">Step {String(i + 1).padStart(2, "0")} / 05</div>
+                    <div className="mt-2 text-[15px] font-semibold text-holo">{s.name}</div>
+                    <p className="m-0 mt-3 font-display text-[clamp(22px,2.4vw,32px)] leading-[1.15] font-semibold tracking-[-.02em] text-text">{s.line}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* step 5: launch CTA, centred */}
+          <div
+            className="absolute inset-0 grid place-items-center px-gutter text-center"
+            style={{ opacity: seg(p, 0.86, 0.92), pointerEvents: p > 0.88 ? "auto" : "none" }}
+          >
+            <div className="relative isolate">
+              {/* dark halo so the launch copy reads over the lit city and beam */}
+              <div aria-hidden="true" className="absolute -inset-x-24 -inset-y-16 -z-10 rounded-full bg-[radial-gradient(closest-side,rgba(4,6,11,.88),rgba(4,6,11,.6)_60%,transparent)]" />
+              <div className="hud">Step 05 / 05</div>
+              <div className="mt-2 font-display text-[clamp(30px,4vw,56px)] leading-[1.05] font-semibold tracking-[-.02em] text-text">Deployment</div>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <a href="#estimate" className={`${btnPrimary} !px-8 !py-4 !text-[17px]`}>
+                  Launch Your Project With Us
+                </a>
+                <Link href="/products/aquila-ehr" className={btnGhost}>
+                  Explore AquilaEHR
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* progress rail */}
+          <nav
+            aria-label="Build steps"
+            className="absolute px-gutter transition-opacity duration-300 max-lg:inset-x-0 max-lg:top-3 lg:top-1/2 lg:right-0 lg:-translate-y-1/2"
+            style={{ opacity: step >= 0 && step < 4 ? 1 : 0, pointerEvents: step >= 0 && step < 4 ? "auto" : "none" }}
+          >
+            <ol className="glass m-0 flex list-none gap-1 rounded-[14px] bg-void/40 p-1.5 lg:flex-col lg:gap-0.5">
+              {STEP_COPY.map((s, i) => {
+                const fill = seg(p, ...STEPS[i]);
+                const on = i === step;
+                return (
+                  <li key={s.name} className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => jumpTo(i)}
+                      aria-current={on ? "step" : undefined}
+                      className={`relative flex w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 py-1.5 text-left lg:px-3 lg:py-2 ${on ? "bg-holo/10" : "hover:bg-holo/5"}`}
+                    >
+                      <span className={`font-mono text-[11px] ${fill >= 1 ? "text-qa" : on ? "text-holo" : "text-muted"}`}>{fill >= 1 ? "✓" : String(i + 1).padStart(2, "0")}</span>
+                      <span className={`text-[12.5px] font-medium max-lg:hidden ${on ? "text-text" : "text-body"}`}>{s.name}</span>
+                      <span aria-hidden="true" className="absolute bottom-0 left-0 h-[2px] bg-holo" style={{ width: `${fill * 100}%` }} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -1,38 +1,28 @@
 @import "tailwindcss";
 
 /*
- * Claim-form design system.
- * The site is set like a CMS-1500: boxes ruled in dropout ink, small ink captions,
- * navy "typed" data. Product pages swap the dropout ink via --form / --form-tint.
+ * Launch theme. Void-black space, hologram ice for the blueprint, amber for the
+ * engine, QA green only for verified/passed states. Glass panels sit over the 3D.
+ * Product pages swap the accent via --accent.
  */
 :root {
-  --form: #d3343b; /* dropout red */
-  --form-tint: #fdf3f2;
+  --accent: #8be9ff;
 }
 
 @theme inline {
-  --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
-  --font-mono: var(--font-plex), "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: var(--font-unbounded), "Unbounded", system-ui, sans-serif;
+  --font-sans: var(--font-geist), "Geist", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
 
-  --color-paper: #fcfdfc;
-  --color-ink: #17233f; /* typed navy */
-  --color-ink-deep: #0c1530;
-  --color-graphite: #3c4458; /* body */
-  --color-muted: #5a6270;
-  --color-paid: #1b7a4b;
-  --color-form: var(--form);
-  --color-form-tint: var(--form-tint);
-}
-
-/* Condensed Archivo widths used for display + captions */
-@utility stretch-caption {
-  font-stretch: 80%;
-}
-@utility stretch-display {
-  font-stretch: 72%;
-}
-@utility stretch-head {
-  font-stretch: 82%;
+  --color-void: #04060b;
+  --color-deep: #0a0f1c;
+  --color-text: #e9eef6;
+  --color-body: #a7b1c2;
+  --color-muted: #8892a6;
+  --color-holo: #8be9ff;
+  --color-amber: #ffb547;
+  --color-qa: #3df5a6;
+  --color-accent: var(--accent);
 }
 
 @utility px-gutter {
@@ -42,33 +32,36 @@
   max-width: 1240px;
   margin-inline: auto;
 }
-
-/* Small form-box caption in dropout ink */
-@utility caption {
+/* HUD label */
+@utility hud {
+  font-family: var(--font-mono);
   font-size: 11.5px;
-  line-height: 1.3;
-  font-stretch: 80%;
-  color: var(--form);
+  letter-spacing: 0.04em;
+  color: var(--color-holo);
 }
-
-/* Form field: bottom-ruled, typed in mono ink */
+/* Glass panel over space */
+@utility glass {
+  background: linear-gradient(160deg, rgba(139, 233, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(139, 233, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
 @utility field {
   width: 100%;
-  padding: 6px 0 8px;
-  border: 0;
-  border-bottom: 1px dashed color-mix(in srgb, var(--form) 55%, transparent);
-  background: transparent;
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: 15px;
+  padding: 13px 14px;
+  border: 1px solid rgba(139, 233, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(4, 6, 11, 0.6);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
   outline: none;
-  border-radius: 0;
   &::placeholder {
-    color: #8a909c;
+    color: #6b7487;
   }
   &:focus {
-    border-bottom: 2px solid var(--color-ink);
-    padding-bottom: 7px;
+    border-color: var(--color-holo);
+    box-shadow: 0 0 0 3px rgba(139, 233, 255, 0.15);
   }
 }
 
@@ -76,8 +69,8 @@
   html,
   body {
     margin: 0;
-    background: var(--color-paper);
-    color: var(--color-ink);
+    background: var(--color-void);
+    color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
@@ -89,10 +82,10 @@
     text-decoration: none;
   }
   ::selection {
-    background: color-mix(in srgb, var(--form) 22%, transparent);
+    background: rgba(139, 233, 255, 0.3);
   }
   :focus-visible {
-    outline: 2px solid var(--color-ink);
+    outline: 2px solid var(--color-holo);
     outline-offset: 2px;
   }
   button {
@@ -100,18 +93,9 @@
   }
 }
 
-/* The one orchestrated moment per form: the rubber stamp */
-@keyframes stamp {
-  0% { opacity: 0; transform: rotate(var(--rot, -9deg)) scale(2.2); }
-  70% { opacity: 1; transform: rotate(var(--rot, -9deg)) scale(0.94); }
-  100% { opacity: 0.92; transform: rotate(var(--rot, -9deg)) scale(1); }
-}
-@keyframes typeIn {
-  from { opacity: 0; transform: translateY(3px); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
-}
-@keyframes caret {
-  50% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -123,5 +107,6 @@
   *::after {
     animation-duration: 0.001ms !important;
     animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
   }
 }

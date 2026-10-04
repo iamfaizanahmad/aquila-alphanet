@@ -1,53 +1,62 @@
 import Link from "next/link";
-import { Part, btnPaper } from "@/components/form";
 import { EstimateWizard } from "@/components/home/EstimateWizard";
 import { Hero } from "@/components/home/Hero";
 import { Products } from "@/components/home/Products";
 import { Rcm } from "@/components/home/Rcm";
 import { Services, Tracks } from "@/components/home/Services";
 import { WhyUs } from "@/components/home/WhyUs";
+import { Glass, Section, btnPrimary } from "@/components/ui";
 import { MARQUEE } from "@/content/home";
 
-/** Standards we work in, written as one EDI-style string: "~" is the X12 segment terminator. */
-function Standards() {
+const STATS = [
+  { v: "11+", l: "Years Exp" },
+  { v: "99.8%", l: "Client Retention" },
+  { v: "50+", l: "Enterprise Apps Delivered" },
+  { v: "5", l: "In-house Products" },
+];
+
+/** Shipping record + the standards we build with. */
+function Record() {
   return (
-    <Part label="Interoperability" className="pb-16">
-      <p className="m-0 border-y-2 border-form py-4 font-mono text-[clamp(14px,1.4vw,17px)] leading-[1.9] break-words text-ink">
-        {MARQUEE.map((m, i) => (
-          <span key={m}>
-            <span className="whitespace-nowrap">{m}</span>
-            {i < MARQUEE.length - 1 && <span className="text-form">~ </span>}
-          </span>
+    <Section label="Shipping record" className="pt-20">
+      <div className="grid gap-px overflow-hidden rounded-[16px] border border-holo/15 bg-holo/10 sm:grid-cols-2 lg:grid-cols-4">
+        {STATS.map((s) => (
+          <div key={s.l} className="bg-void/90 p-6">
+            <div className="font-display text-[clamp(30px,3vw,42px)] leading-none font-semibold tracking-[-.03em] text-text">{s.v}</div>
+            <div className="mt-2 text-[14px] text-muted">{s.l}</div>
+          </div>
         ))}
-        <span className="text-form">~</span>
-      </p>
-    </Part>
+      </div>
+      <ul className="m-0 mt-4 flex list-none flex-wrap gap-2 p-0" aria-label="Standards and platforms">
+        {MARQUEE.map((m) => (
+          <li key={m} className="rounded-full border border-holo/15 px-3 py-1 font-mono text-[11.5px] text-body">
+            {m}
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }
 
 function GetStarted() {
   return (
-    <section className="px-gutter">
-      <div className="sheet lg:px-14">
-        <div className="grid gap-8 bg-ink p-6 text-white sm:p-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end">
-          <div>
-            <h2 className="m-0 text-[clamp(40px,5.4vw,76px)] leading-[.92] font-black uppercase stretch-display">Get Started Today!</h2>
-            <p className="mt-5 mb-0 max-w-[52ch] text-[17px] leading-[1.65] text-white/85">
-              Ready to take your business to the next level? Contact us today to discuss how AlphaNet Solutions can help
-              you achieve your goals.
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-4">
-            <Link href="/contact" className={`${btnPaper} focus-visible:outline-white`}>
-              Contact Us
-            </Link>
-            <p className="m-0 font-mono text-[13.5px] leading-[1.6] text-white/75">
-              Join us on this journey of innovation and growth. Together, let’s build the future!
-            </p>
-          </div>
+    <Section label="Get started" className="pt-20">
+      <Glass className="grid gap-8 p-7 sm:p-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end">
+        <div>
+          <h2 className="m-0 font-display text-[clamp(32px,4.2vw,58px)] leading-[1.02] font-semibold tracking-[-.03em] text-text">Get Started Today!</h2>
+          <p className="mt-5 mb-0 max-w-[52ch] text-[17px] leading-[1.65] text-body">
+            Ready to take your business to the next level? Contact us today to discuss how AlphaNet Solutions can help you
+            achieve your goals.
+          </p>
         </div>
-      </div>
-    </section>
+        <div className="flex flex-col items-start gap-4">
+          <Link href="/contact" className={btnPrimary}>
+            Contact Us
+          </Link>
+          <p className="m-0 text-[14.5px] leading-[1.6] text-muted">Join us on this journey of innovation and growth. Together, let’s build the future!</p>
+        </div>
+      </Glass>
+    </Section>
   );
 }
 
@@ -56,7 +65,7 @@ export default function Home() {
     <>
       <main>
         <Hero />
-        <Standards />
+        <Record />
         <Services />
         <Tracks />
         <Rcm />
@@ -67,7 +76,7 @@ export default function Home() {
       </main>
       <a
         href="#estimate"
-        className="fixed right-4 bottom-4 z-40 inline-flex items-center gap-2 rounded-[3px] border-2 border-paper bg-ink px-5 py-3 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(23,35,63,.28)] stretch-head hover:bg-ink-deep sm:right-6 sm:bottom-6"
+        className="glass fixed right-4 bottom-4 z-40 inline-flex items-center rounded-full bg-void/70 px-5 py-3 text-[14.5px] font-semibold text-holo hover:border-holo sm:right-6 sm:bottom-6"
       >
         Get an estimate
       </a>

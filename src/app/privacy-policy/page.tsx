@@ -14,11 +14,11 @@ const SECTIONS: LegalSection[] = [
       <>
         <p className="mt-[14px] mb-0">We may collect the following types of information:</p>
         <p className="mt-3 mb-0">
-          <strong className="text-ink">Personal Information:</strong> This includes your name, email address, phone
+          <strong>Personal Information:</strong> This includes your name, email address, phone
           number, and any other details you provide when you contact us or sign up for our services.
         </p>
         <p className="mt-3 mb-0">
-          <strong className="text-ink">Usage Data:</strong> We collect information about how you use our website,
+          <strong>Usage Data:</strong> We collect information about how you use our website,
           including your IP address, browser type, pages visited, and the time and date of your visit.
         </p>
       </>
@@ -102,7 +102,7 @@ const SECTIONS: LegalSection[] = [
         <p className="mt-[14px] mb-0">
           If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:
         </p>
-        <p className="mt-[14px] mb-0 text-ink">
+        <p className="mt-[14px] mb-0 text-text">
           AlphaNet Solutions
           <br />
           {CONTACT.address}
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      tone="red"
+
       intro="At AlphaNet Solutions, we value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, and safeguard your data when you visit our website and use our services."
       sections={SECTIONS}
     />

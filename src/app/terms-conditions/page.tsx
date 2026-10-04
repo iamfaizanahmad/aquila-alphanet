@@ -66,7 +66,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         {p("If you have any questions or concerns about these Terms and Conditions, please contact us at:")}
-        <p className="mt-[14px] mb-0 text-ink">
+        <p className="mt-[14px] mb-0 text-text">
           AlphaNet Solutions
           <br />
           {CONTACT.address}
@@ -85,7 +85,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms & Conditions"
-      tone="blue"
+
       intro="Welcome to the AlphaNet Solutions website. By accessing or using our website and services, you agree to comply with and be bound by the following Terms and Conditions. If you do not agree with these terms, please do not use our website."
       sections={SECTIONS}
     />

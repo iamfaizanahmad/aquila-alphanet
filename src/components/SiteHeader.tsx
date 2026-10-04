@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCTS, PRODUCT_INK, PRODUCT_LINKS } from "@/content/products";
-import { btnInk } from "./form";
+import { btnPrimary } from "./ui";
 
 type NavKey = "home" | "products" | "about" | "contact" | "none";
 
@@ -18,19 +18,15 @@ function activeKey(path: string): NavKey {
 
 const NAV_PRODUCTS = PRODUCT_LINKS.map((l) => ({ ...l, name: PRODUCTS[l.key].name, ink: PRODUCT_INK[l.key].ink }));
 
-const navItem = (on: boolean) =>
-  `relative px-3 py-2 text-[15px] font-semibold stretch-head text-ink hover:text-form ${
-    on ? "after:absolute after:inset-x-3 after:-bottom-[1px] after:h-[2px] after:bg-form" : ""
-  }`;
-
-const mobileLink = "block border-b border-dashed border-form py-3 text-[18px] font-bold text-ink stretch-head";
+const navItem = (on: boolean) => `rounded-full px-3.5 py-2 text-[14.5px] font-medium ${on ? "bg-holo/10 text-text" : "text-body hover:text-text"}`;
+const mobileLink = "block rounded-[10px] px-2 py-3 text-[18px] font-semibold text-text hover:bg-holo/10";
 
 /** Placeholder wordmark until the real AlphaNet logo exists. */
 export function Wordmark() {
   return (
     <span className="flex items-center gap-2.5">
-      <span className="grid h-9 w-9 place-items-center border-2 border-form font-mono text-[14px] font-semibold text-ink">AN</span>
-      <span className="text-[19px] leading-none font-extrabold tracking-[-.01em] text-ink stretch-head">AlphaNet Solutions</span>
+      <span className="grid h-8 w-8 place-items-center rounded-[9px] border border-holo/50 font-display text-[11px] font-semibold text-holo shadow-[0_0_18px_rgba(139,233,255,.25)]">AN</span>
+      <span className="text-[17px] leading-none font-semibold tracking-[-.01em] text-text">AlphaNet Solutions</span>
     </span>
   );
 }
@@ -49,8 +45,8 @@ export function SiteHeader() {
   useEffect(() => () => clearTimeout(closeT.current), []);
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-form bg-paper/95 backdrop-blur-[6px]">
-      <div className="sheet flex items-center justify-between gap-5 px-gutter py-3 lg:px-14">
+    <header className="sticky top-0 z-50 border-b border-holo/10 bg-void/70 backdrop-blur-[14px]">
+      <div className="sheet flex h-16 items-center justify-between gap-5 px-gutter lg:px-8">
         <Link href="/" aria-label="AlphaNet Solutions home">
           <Wordmark />
         </Link>
@@ -82,24 +78,17 @@ export function SiteHeader() {
               </svg>
             </button>
             {open && (
-              <div className="absolute top-full left-1/2 z-50 w-[min(640px,92vw)] -translate-x-1/2 pt-3">
-                <div className="border-2 border-form bg-paper shadow-[0_18px_40px_rgba(23,35,63,.14)]">
-                  <div className="caption border-b border-form px-4 py-2">Our products</div>
-                  <div className="grid sm:grid-cols-2">
-                    {NAV_PRODUCTS.map((p, i) => (
-                      <Link
-                        key={p.key}
-                        href={p.href}
-                        className={`flex gap-3 border-form p-4 hover:bg-form-tint ${i % 2 === 0 ? "sm:border-r" : ""} ${i < NAV_PRODUCTS.length - 1 ? "border-b" : ""}`}
-                      >
-                        <span className="mt-1 h-3 w-3 flex-none" style={{ background: p.ink }} />
-                        <span>
-                          <span className="block text-[16px] font-bold text-ink stretch-head">{p.name}</span>
-                          <span className="mt-1 block text-[13.5px] leading-[1.45] text-muted">{p.tag}</span>
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
+              <div className="absolute top-full left-1/2 z-50 w-[min(640px,92vw)] -translate-x-1/2 pt-2">
+                <div className="glass grid gap-1 rounded-[16px] bg-deep/90 p-2 shadow-[0_24px_60px_rgba(0,0,0,.6)] sm:grid-cols-2">
+                  {NAV_PRODUCTS.map((p) => (
+                    <Link key={p.key} href={p.href} className="flex gap-3 rounded-[12px] p-3 hover:bg-holo/10">
+                      <span className="mt-1.5 h-2.5 w-2.5 flex-none rounded-full" style={{ background: p.ink, boxShadow: `0 0 10px ${p.ink}` }} />
+                      <span>
+                        <span className="block text-[15px] font-semibold text-text">{p.name}</span>
+                        <span className="mt-0.5 block text-[13.5px] leading-[1.45] text-muted">{p.tag}</span>
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
@@ -110,7 +99,7 @@ export function SiteHeader() {
           <Link href="/contact" className={navItem(active === "contact")}>
             Contact Us
           </Link>
-          <Link href="/contact" className={`${btnInk} ml-3 !px-5 !py-2.5 !text-[15px]`}>
+          <Link href="/contact" className={`${btnPrimary} ml-3 !px-5 !py-2.5 !text-[14.5px]`}>
             Request Demo
           </Link>
         </nav>
@@ -120,35 +109,33 @@ export function SiteHeader() {
           aria-label="Menu"
           aria-expanded={mobile}
           onClick={() => setMobile((m) => !m)}
-          className="grid h-11 w-11 place-items-center border-2 border-form min-[940px]:hidden"
+          className="grid h-11 w-11 place-items-center rounded-full border border-holo/30 min-[940px]:hidden"
         >
           <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
-            <path d={mobile ? "M3 1l14 12M17 1L3 13" : "M0 1h20M0 7h20M0 13h13"} stroke="#17233F" strokeWidth="2" />
+            <path d={mobile ? "M3 1l14 12M17 1L3 13" : "M0 1h20M0 7h20M0 13h13"} stroke="#E9EEF6" strokeWidth="2" />
           </svg>
         </button>
       </div>
 
       {mobile && (
-        <nav aria-label="Main" className="border-t border-form bg-paper px-gutter pt-2 pb-6 min-[940px]:hidden">
+        <nav aria-label="Main" className="border-t border-holo/10 bg-void/95 px-gutter pt-2 pb-6 min-[940px]:hidden">
           <Link href="/" className={mobileLink}>
             Home
           </Link>
-          <div className="border-b border-dashed border-form pb-2">
-            <div className="caption pt-4 pb-1">Our Products</div>
-            {NAV_PRODUCTS.map((p) => (
-              <Link key={p.key} href={p.href} className="flex items-center gap-3 py-2.5 text-[16px] font-semibold text-ink">
-                <span className="h-2.5 w-2.5" style={{ background: p.ink }} />
-                {p.name}
-              </Link>
-            ))}
-          </div>
+          <div className="hud px-2 pt-3 pb-1">Our Products</div>
+          {NAV_PRODUCTS.map((p) => (
+            <Link key={p.key} href={p.href} className="flex items-center gap-3 rounded-[10px] px-2 py-2.5 text-[16px] font-medium text-text hover:bg-holo/10">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.ink }} />
+              {p.name}
+            </Link>
+          ))}
           <Link href="/about" className={mobileLink}>
             About Us
           </Link>
           <Link href="/contact" className={mobileLink}>
             Contact Us
           </Link>
-          <Link href="/contact" className={`${btnInk} mt-4 w-full`}>
+          <Link href="/contact" className={`${btnPrimary} mt-4 w-full`}>
             Request Demo
           </Link>
         </nav>

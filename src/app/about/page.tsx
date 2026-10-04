@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Box, Caption, Check, Heading, Part, Ruled } from "@/components/form";
+import { Glass, Heading, Section, Tick, link } from "@/components/ui";
 import { CONTACT } from "@/content/site";
 
 export const metadata: Metadata = { title: "About Us — AlphaNet Solutions" };
@@ -37,121 +37,111 @@ const TEAM = [
   { i: "BR", name: "Bilal Rashid", role: "Chief Operating Officer" },
 ];
 
-const link = "underline underline-offset-4 decoration-form hover:text-form";
-
 export default function AboutPage() {
   return (
     <main>
-      <section className="px-gutter pt-6 pb-16 sm:pt-8">
-        <div className="sheet lg:px-14">
-          <Ruled className="border-t-2">
-            <Box caption="About Us" className="bg-form-tint">
-              <h1 className="m-0 mt-3 max-w-[14ch] text-[clamp(44px,6.6vw,100px)] leading-[.9] font-black tracking-[-.02em] text-ink uppercase stretch-display">
-                Welcome to AlphaNet Solutions!
-              </h1>
-            </Box>
-            <Box caption="Description">
-              <p className="mt-3 mb-0 max-w-[72ch] text-[clamp(16px,1.4vw,19px)] leading-[1.7] text-graphite">
-                AlphaNet Solutions is a software and healthcare technology company specializing in custom software
-                development, EHR/PM solutions, Revenue Cycle Management (RCM), cloud and DevOps services, API
-                integrations, AI automation, and product modernization. We help businesses build, deploy, customize,
-                integrate, and scale secure digital solutions while providing ongoing technical support and maintenance.
-              </p>
-            </Box>
-          </Ruled>
+      <Section label="About Us" className="pt-12">
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-end">
+          <h1 className="m-0 max-w-[16ch] font-display text-[clamp(36px,5vw,72px)] leading-[1.02] font-semibold tracking-[-.03em] text-text">Welcome to AlphaNet Solutions!</h1>
+          <p className="m-0 max-w-[60ch] text-[clamp(16px,1.4vw,19px)] leading-[1.7] text-body">
+            AlphaNet Solutions is a software and healthcare technology company specializing in custom software development,
+            EHR/PM solutions, Revenue Cycle Management (RCM), cloud and DevOps services, API integrations, AI automation,
+            and product modernization. We help businesses build, deploy, customize, integrate, and scale secure digital
+            solutions while providing ongoing technical support and maintenance.
+          </p>
         </div>
-      </section>
+      </Section>
 
-      <Part label="Expertise" className="pb-16">
-        <Heading as="h2">Our expertise encompasses</Heading>
-        <Ruled className="mt-6 sm:grid-cols-2 lg:grid-cols-3">
+      <Section label="Expertise" className="pt-20">
+        <Heading>Our expertise encompasses</Heading>
+        <Glass className="mt-6 grid gap-x-6 p-2 sm:grid-cols-2 lg:grid-cols-3">
           {EXPERTISE.map((e) => (
-            <div key={e} className="flex items-start gap-3 p-4">
-              <Check on className="mt-1" />
-              <span className="text-[16.5px] leading-[1.3] font-bold text-ink stretch-head">{e}</span>
+            <div key={e} className="flex items-start gap-3 rounded-[10px] px-3 py-3">
+              <Tick on className="mt-0.5 !border-holo !bg-holo/15 !text-holo" />
+              <span className="text-[15.5px] leading-[1.35] font-medium text-text">{e}</span>
             </div>
           ))}
-        </Ruled>
-      </Part>
+        </Glass>
+      </Section>
 
-      <Part label="Mission and vision" className="pb-16">
-        <Ruled className="md:grid-cols-2">
-          <Box caption="Our Mission" className="sm:!p-8">
-            <p className="mt-3 mb-0 text-[clamp(18px,1.8vw,23px)] leading-[1.45] font-semibold text-ink stretch-head">
-              Our mission is to empower businesses through technology. We strive to deliver high-quality solutions that
-              not only meet your requirements but also exceed your expectations. We understand that each project is
-              unique, and we approach every challenge with creativity, dedication, and a commitment to excellence.
-            </p>
-          </Box>
-          <Box caption="Our Vision" className="sm:!p-8">
-            <p className="mt-3 mb-0 text-[clamp(18px,1.8vw,23px)] leading-[1.45] font-semibold text-ink stretch-head">
-              At AlphaNet Solutions, our vision is to be a trusted partner for businesses seeking innovative software
-              solutions. We aim to foster long-lasting relationships built on transparency, collaboration, and mutual
-              success.
-            </p>
-          </Box>
-        </Ruled>
-      </Part>
+      <Section label="Mission and vision" className="pt-20">
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            [
+              "Our Mission",
+              "Our mission is to empower businesses through technology. We strive to deliver high-quality solutions that not only meet your requirements but also exceed your expectations. We understand that each project is unique, and we approach every challenge with creativity, dedication, and a commitment to excellence.",
+            ],
+            [
+              "Our Vision",
+              "At AlphaNet Solutions, our vision is to be a trusted partner for businesses seeking innovative software solutions. We aim to foster long-lasting relationships built on transparency, collaboration, and mutual success.",
+            ],
+          ].map(([t, d]) => (
+            <Glass key={t} className="p-7 sm:p-9">
+              <div className="hud">{t}</div>
+              <p className="mt-3 mb-0 text-[clamp(18px,1.7vw,22px)] leading-[1.5] font-medium text-text">{d}</p>
+            </Glass>
+          ))}
+        </div>
+      </Section>
 
-      <Part label="Why Choose Us?" className="pb-16">
+      <Section label="Why Choose Us?" className="pt-20">
         <Heading>Why Choose Us?</Heading>
-        <Ruled className="mt-6 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
           {WHY.map((w) => (
-            <Box key={w.t}>
+            <Glass key={w.t} className="p-6">
               <Heading as="h3">{w.t}</Heading>
-              <p className="mt-3 mb-0 text-[15px] leading-[1.65] text-graphite">{w.d}</p>
-            </Box>
+              <p className="mt-3 mb-0 text-[15px] leading-[1.65] text-body">{w.d}</p>
+            </Glass>
           ))}
-        </Ruled>
-      </Part>
+        </div>
+      </Section>
 
-      <Part label="Our Team" className="pb-16">
+      <Section label="Our Team" className="pt-20">
         <Heading>Our Team</Heading>
-        <Ruled className="mt-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
-          <div className="p-4 sm:p-5">
-            <Caption>Photograph</Caption>
-            {/* Portrait placeholder — replace with the CEO photo. */}
-            <div className="relative mt-3 grid aspect-[4/5] w-full max-w-[340px] place-items-center border-2 border-dashed border-form bg-form-tint">
-              <span className="font-mono text-[72px] font-semibold text-ink">HS</span>
-              <span className="absolute bottom-3 left-3 font-mono text-[11px] text-muted">portrait placeholder</span>
-            </div>
+        <Glass className="mt-6 grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
+          {/* Portrait placeholder — replace with the CEO photo. */}
+          <div className="relative grid aspect-[4/5] w-full max-w-[340px] place-items-center rounded-[14px] border border-dashed border-holo/30 bg-[radial-gradient(circle_at_50%_30%,rgba(139,233,255,.14),transparent_65%)]">
+            <span className="font-display text-[64px] font-semibold text-holo">HS</span>
+            <span className="hud absolute bottom-3 left-3 !text-muted">portrait placeholder</span>
           </div>
-          <Box caption="Owner & CEO">
-            <h3 className="m-0 mt-3 text-[clamp(34px,4vw,56px)] leading-[.95] font-black text-ink uppercase stretch-display">Haroon Sher</h3>
-            <p className="mt-5 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-graphite">
-              Haroon Sher is the Owner and CEO of AlphaNet Solutions, bringing over 11 years of experience in the
-              software and IT industry. With a strong background in software development, additionally, Haroon has honed
-              his expertise in Electronic Health Records (EHR) and Practice Management software, positioning him as a
-              leader in the healthcare technology sector.
+          <div>
+            <div className="hud">Owner &amp; CEO</div>
+            <h3 className="m-0 mt-2 font-display text-[clamp(28px,3.2vw,44px)] leading-[1.05] font-semibold tracking-[-.025em] text-text">Haroon Sher</h3>
+            <p className="mt-5 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-body">
+              Haroon Sher is the Owner and CEO of AlphaNet Solutions, bringing over 11 years of experience in the software
+              and IT industry. With a strong background in software development, additionally, Haroon has honed his
+              expertise in Electronic Health Records (EHR) and Practice Management software, positioning him as a leader in
+              the healthcare technology sector.
             </p>
-            <p className="mt-4 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-graphite">
-              His vision for AlphaNet Solutions is rooted in a commitment to innovation and excellence, driving the
-              company to deliver cutting-edge solutions that empower businesses and enhance user experiences.
-              Haroon&apos;s passion for technology and his dedication to client success have established him as a trusted
-              partner in the industry. Under his leadership, AlphaNet Solutions continues to thrive, providing
-              exceptional services tailored to meet the unique needs of clients across various sectors.
+            <p className="mt-4 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-body">
+              His vision for AlphaNet Solutions is rooted in a commitment to innovation and excellence, driving the company
+              to deliver cutting-edge solutions that empower businesses and enhance user experiences. Haroon&apos;s passion
+              for technology and his dedication to client success have established him as a trusted partner in the industry.
+              Under his leadership, AlphaNet Solutions continues to thrive, providing exceptional services tailored to meet
+              the unique needs of clients across various sectors.
             </p>
-          </Box>
-        </Ruled>
-        <Ruled className="!border-t-0 md:grid-cols-3">
+          </div>
+        </Glass>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           {TEAM.map((m) => (
-            <div key={m.name} className="flex items-center gap-4 p-4 sm:p-5">
-              <span className="grid h-14 w-14 flex-none place-items-center border-2 border-form font-mono text-[18px] font-semibold text-ink">{m.i}</span>
+            <Glass key={m.name} className="flex items-center gap-4 p-5">
+              <span className="grid h-14 w-14 flex-none place-items-center rounded-[14px] border border-holo/40 font-display text-[15px] font-semibold text-holo">{m.i}</span>
               <div>
-                <div className="text-[20px] leading-tight font-extrabold text-ink stretch-head">{m.name}</div>
-                <div className="mt-1 font-mono text-[13px] text-muted">{m.role}</div>
+                <div className="text-[18px] leading-tight font-semibold text-text">{m.name}</div>
+                <div className="mt-1 text-[14px] text-muted">{m.role}</div>
               </div>
-            </div>
+            </Glass>
           ))}
-        </Ruled>
-      </Part>
+        </div>
+      </Section>
 
-      <Part label="Company Info">
+      <Section label="Company Info" className="pt-20">
         <Heading>AlphaNet Solutions – HASH LLC</Heading>
-        <Ruled className="mt-6 lg:grid-cols-3">
-          <Box caption="USA Address">
-            <p className="mt-3 mb-0 text-[19px] leading-[1.35] font-bold text-ink stretch-head">{CONTACT.address}</p>
-            <div className="mt-4 space-y-1 font-mono text-[14px] text-ink">
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <Glass className="p-6">
+            <div className="hud">USA Address</div>
+            <p className="mt-2 mb-0 text-[18px] leading-[1.4] font-semibold text-text">{CONTACT.address}</p>
+            <div className="mt-4 space-y-1 text-[15px] text-body">
               <div>
                 Contact #{" "}
                 <a className={link} href="tel:+19148989007">
@@ -160,12 +150,11 @@ export default function AboutPage() {
               </div>
               <div>Fax # +19148989216</div>
             </div>
-          </Box>
-          <Box caption="Main Address">
-            <p className="mt-3 mb-0 text-[19px] leading-[1.35] font-bold text-ink stretch-head">
-              CB-42/5 Elahi Street Lane No.8 New Afshan Colony Range Road Rawalpindi, Pakistan, 46000
-            </p>
-            <div className="mt-4 font-mono text-[14px] text-ink">
+          </Glass>
+          <Glass className="p-6">
+            <div className="hud">Main Address</div>
+            <p className="mt-2 mb-0 text-[18px] leading-[1.4] font-semibold text-text">CB-42/5 Elahi Street Lane No.8 New Afshan Colony Range Road Rawalpindi, Pakistan, 46000</p>
+            <div className="mt-4 text-[15px] text-body">
               Contact #{" "}
               <a className={link} href="tel:+923392226520">
                 +923392226520
@@ -175,9 +164,10 @@ export default function AboutPage() {
                 +923159873987
               </a>
             </div>
-          </Box>
-          <Box caption="Online">
-            <div className="mt-3 space-y-1.5 font-mono text-[14px] leading-[1.6] text-ink">
+          </Glass>
+          <Glass className="p-6">
+            <div className="hud">Online</div>
+            <div className="mt-2 space-y-1.5 text-[15px] leading-[1.6] text-body">
               <div>
                 Email: <a className={link} href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
               </div>
@@ -191,9 +181,9 @@ export default function AboutPage() {
                 Instagram: <a className={link} href={CONTACT.instagram}>@alphanet_solutions</a>
               </div>
             </div>
-          </Box>
-        </Ruled>
-      </Part>
+          </Glass>
+        </div>
+      </Section>
     </main>
   );
 }

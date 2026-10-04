@@ -226,14 +226,11 @@ export const PRODUCT_LINKS: ProductLink[] = [
 
 export const productBySlug = (slug: string) => PRODUCT_LINKS.find((l) => l.slug === slug);
 
-/**
- * Claim-form theme: each product is printed in its own dropout ink (like multi-part form copies).
- * All inks pass 4.5:1 on paper (#FCFDFC) for small caption text.
- */
+/** Per-product accent for the dark launch theme: luminous enough for small text on #04060B. */
 export const PRODUCT_INK: Record<ProductKey, { ink: string; tint: string }> = {
-  aquila: { ink: "#D3343B", tint: "#FDF3F2" },
-  credentialing: { ink: "#2F5D9E", tint: "#F1F5FB" },
-  ticketing: { ink: "#1D6E74", tint: "#EFF7F7" },
-  personic: { ink: "#7A3E8E", tint: "#F7F1F9" },
-  woundwise: { ink: "#B04A12", tint: "#FCF3EE" },
+  aquila: { ink: "#8BE9FF", tint: "rgba(139,233,255,.10)" },
+  credentialing: { ink: "#A89BFF", tint: "rgba(168,155,255,.10)" },
+  ticketing: { ink: "#6CE3C9", tint: "rgba(108,227,201,.10)" },
+  personic: { ink: "#D9A3FF", tint: "rgba(217,163,255,.10)" },
+  woundwise: { ink: "#FF9AAE", tint: "rgba(255,154,174,.10)" },
 };
