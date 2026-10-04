@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Box, Caption, Check, Heading, Part, Ruled, Stamp, btnInk } from "@/components/form";
 import { BUDGETS, SCOPES, TIMELINES } from "@/content/home";
 import { CONTACT } from "@/content/site";
 import { submitLead } from "@/lib/submitLead";
-
-const selCls = (on: boolean) =>
-  `cursor-pointer border transition-[border-color,background] duration-[250ms] hover:border-[rgba(0,240,255,.45)] ${
-    on ? "border-[rgba(0,240,255,.5)] bg-[rgba(0,240,255,.10)]" : "border-[rgba(255,255,255,.1)] bg-[rgba(255,255,255,.03)]"
-  }`;
 
 /** Scope weight → indicative build window (README § Estimate wizard). */
 function estimateWindow(scope: string[]) {
@@ -21,6 +17,15 @@ function estimateWindow(scope: string[]) {
 }
 
 const EMPTY = { scope: [] as string[], budget: "", timeline: "", name: "", email: "", phone: "" };
+const STEPS = ["1 · Scope", "2 · Scale", "3 · Contact"];
+
+function Radio({ on }: { on: boolean }) {
+  return (
+    <span aria-hidden="true" className="grid h-[15px] w-[15px] flex-none place-items-center rounded-full border border-form">
+      {on && <span className="h-[7px] w-[7px] rounded-full bg-ink" />}
+    </span>
+  );
+}
 
 export function EstimateWizard() {
   const [step, setStep] = useState(1);
@@ -60,42 +65,37 @@ export function EstimateWizard() {
   };
 
   return (
-    <section
-      id="estimate"
-      className="relative z-[1] border-t border-[rgba(255,255,255,.06)] bg-[linear-gradient(180deg,transparent,rgba(0,240,255,.05))] px-gutter py-section"
-    >
-      <div className="mx-auto max-w-[1000px]">
-        <div className="text-center">
-          <div data-reveal="" className="kicker text-cyan">
-            05 — Project Estimate
-          </div>
-          <h2 data-reveal="80" className="mt-4 mb-0 font-display text-[clamp(30px,4.2vw,52px)] leading-[1.08] font-bold tracking-[-.03em]">
-            Three steps to a call back.
-          </h2>
-        </div>
-        <div
-          data-reveal="160"
-          className="mt-10 rounded-[28px] border border-[rgba(255,255,255,.11)] bg-[linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.02))] p-[clamp(24px,3.2vw,44px)] shadow-[0_40px_100px_rgba(0,0,0,.5),inset_0_1px_0_rgba(255,255,255,.12)] backdrop-blur-[16px]"
-        >
-          <div className="flex items-center gap-[10px]">
-            {["1 · Scope", "2 · Scale", "3 · Contact"].map((label, i) => (
-              <div key={label} className="flex-1">
-                <div
-                  className="h-[5px] rounded-[3px] transition-[background] duration-[350ms]"
-                  style={{ background: step > i ? "linear-gradient(90deg,#00F0FF,#8B7CFF)" : "rgba(255,255,255,.12)" }}
-                />
-                <div className="mt-[10px] text-[12.5px] font-semibold" style={{ color: step > i ? "#8FF6FF" : "#7E89A0" }}>
-                  {label}
-                </div>
-              </div>
-            ))}
-          </div>
+    <Part id="estimate" label="Project Estimate" className="pb-16">
+      <Heading>Three steps to a call back.</Heading>
 
+      <div className="mt-8 border-2 border-form">
+        <ol className="m-0 grid list-none grid-cols-3 p-0">
+          {STEPS.map((label, i) => {
+            const done = step > i + 1 || sent;
+            const on = step === i + 1 && !sent;
+            return (
+              <li
+                key={label}
+                aria-current={on ? "step" : undefined}
+                className={`flex items-center gap-2 border-b border-form px-3 py-3 text-[14px] font-bold stretch-head sm:px-5 ${i < 2 ? "border-r" : ""} ${
+                  on ? "bg-ink text-white" : done ? "bg-form-tint text-ink" : "text-muted"
+                }`}
+              >
+                {done && <Check on />}
+                {label}
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="p-4 sm:p-7">
           {step === 1 && !sent && (
-            <div className="mt-[34px] animate-[anIn_.35s_ease-out]">
-              <div className="font-display text-[clamp(20px,2.4vw,26px)] font-bold tracking-[-.02em]">What are we building?</div>
-              <div className="mt-2 text-[14.5px] text-muted">Pick everything that applies.</div>
-              <div className="mt-[22px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] gap-3">
+            <fieldset className="m-0 border-0 p-0">
+              <legend className="p-0">
+                <Heading as="h3">What are we building?</Heading>
+                <p className="mt-1 mb-0 text-[15px] text-muted">Pick everything that applies.</p>
+              </legend>
+              <Ruled className="mt-5 sm:grid-cols-2 lg:grid-cols-4">
                 {SCOPES.map((x) => {
                   const on = form.scope.includes(x.key);
                   return (
@@ -104,115 +104,136 @@ export function EstimateWizard() {
                       type="button"
                       aria-pressed={on}
                       onClick={() => set({ scope: on ? form.scope.filter((k) => k !== x.key) : form.scope.concat(x.key) })}
-                      className={`rounded-2xl p-[18px] text-left ${selCls(on)}`}
+                      className={`flex gap-3 p-4 text-left ${on ? "bg-form-tint" : "bg-paper hover:bg-form-tint/60"}`}
                     >
-                      <div className="flex items-center justify-between gap-[10px]">
-                        <span className="font-display text-[15.5px] font-semibold">{x.name}</span>
-                        <span className="font-mono text-[13px]" style={{ color: on ? "#00F0FF" : "rgba(255,255,255,.14)" }}>
-                          ✓
-                        </span>
-                      </div>
-                      <div className="mt-[7px] text-[12.5px] text-dim">{x.hint}</div>
+                      <Check on={on} className="mt-0.5" />
+                      <span>
+                        <span className="block text-[16.5px] leading-tight font-bold text-ink stretch-head">{x.name}</span>
+                        <span className="mt-1 block text-[13.5px] leading-[1.45] text-muted">{x.hint}</span>
+                      </span>
                     </button>
                   );
                 })}
-              </div>
-            </div>
+              </Ruled>
+            </fieldset>
           )}
 
           {step === 2 && !sent && (
-            <div className="mt-[34px] animate-[anIn_.35s_ease-out]">
-              <div className="font-display text-[clamp(20px,2.4vw,26px)] font-bold tracking-[-.02em]">Scale and timing</div>
-              <div className="mt-[22px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-6">
+            <div>
+              <Heading as="h3">Scale and timing</Heading>
+              <div className="mt-5 grid gap-8 md:grid-cols-2">
                 {(
                   [
                     ["Budget range", BUDGETS, "budget"],
                     ["Start window", TIMELINES, "timeline"],
                   ] as const
                 ).map(([title, opts, key]) => (
-                  <div key={key}>
-                    <div className="text-[12.5px] font-semibold tracking-[.1em] text-subtle uppercase">{title}</div>
-                    <div className="mt-3 flex flex-col gap-[10px]">
-                      {opts.map((o) => (
-                        <button
-                          key={o}
-                          type="button"
-                          aria-pressed={form[key] === o}
-                          onClick={() => set({ [key]: o })}
-                          className={`rounded-[13px] px-4 py-[14px] text-left text-[14.5px] font-medium ${selCls(form[key] === o)}`}
-                        >
-                          {o}
-                        </button>
-                      ))}
+                  <div key={key} role="radiogroup" aria-label={title}>
+                    <Caption className="text-[12.5px]">{title}</Caption>
+                    <div className="mt-2 border-t border-form">
+                      {opts.map((o) => {
+                        const on = form[key] === o;
+                        return (
+                          <button
+                            key={o}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            onClick={() => set({ [key]: o })}
+                            className={`flex w-full items-center gap-3 border-b border-form px-2 py-3 text-left font-mono text-[14.5px] text-ink ${on ? "bg-form-tint" : "hover:bg-form-tint/60"}`}
+                          >
+                            <Radio on={on} />
+                            {o}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[rgba(0,240,255,.22)] bg-[rgba(0,240,255,.06)] px-5 py-[18px]">
-                <div className="text-[14px] text-[#B6C0D3]">Indicative build window for what you picked</div>
-                <div className="font-display text-[24px] font-extrabold tracking-[-.02em] text-cyan-light">{estimate}</div>
+              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-3 border-2 border-dashed border-form bg-form-tint px-4 py-4">
+                <span className="text-[15px] text-graphite">Indicative build window for what you picked</span>
+                <span aria-live="polite" className="font-mono text-[26px] font-semibold text-ink">
+                  {estimate}
+                </span>
               </div>
             </div>
           )}
 
           {step === 3 && !sent && (
-            <div className="mt-[34px] animate-[anIn_.35s_ease-out]">
-              <div className="font-display text-[clamp(20px,2.4vw,26px)] font-bold tracking-[-.02em]">Where do we call you?</div>
-              <div className="mt-[22px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-[14px]">
-                <input aria-label="Full name" autoComplete="name" value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="Full name" className="field" />
-                <input aria-label="Work email" type="email" autoComplete="email" value={form.email} onChange={(e) => set({ email: e.target.value })} placeholder="Work email" className="field" />
-                <input aria-label="Phone" type="tel" autoComplete="tel" value={form.phone} onChange={(e) => set({ phone: e.target.value })} placeholder="Phone" className="field" />
-              </div>
-              <div className="mt-5 rounded-2xl border border-[rgba(255,255,255,.09)] bg-[rgba(255,255,255,.03)] p-5 text-[14px] leading-[1.8] text-[#B6C0D3]">
-                <div>
-                  <span className="text-subtle">Scope — </span>
-                  {scopeNames.length ? scopeNames.join(", ") : "Not selected"}
-                </div>
-                <div>
-                  <span className="text-subtle">Budget — </span>
-                  {form.budget || "Not selected"}
-                </div>
-                <div>
-                  <span className="text-subtle">Start — </span>
-                  {form.timeline || "Not selected"}
-                </div>
-                <div>
-                  <span className="text-subtle">Estimated window — </span>
-                  <span className="font-bold text-cyan-light">{estimate}</span>
-                </div>
-              </div>
+            <div>
+              <Heading as="h3">Where do we call you?</Heading>
+              <Ruled className="mt-5 md:grid-cols-3">
+                {(
+                  [
+                    ["name", "Full name", "text", "name"],
+                    ["email", "Work email", "email", "email"],
+                    ["phone", "Phone", "tel", "tel"],
+                  ] as const
+                ).map(([key, label, type, ac]) => (
+                  <label key={key} className="block p-4">
+                    <Caption>{label}</Caption>
+                    <input
+                      type={type}
+                      autoComplete={ac}
+                      value={form[key]}
+                      onChange={(e) => set({ [key]: e.target.value })}
+                      placeholder={label}
+                      className="field mt-1"
+                    />
+                  </label>
+                ))}
+              </Ruled>
+              <Ruled className="mt-5 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  ["Scope", scopeNames.length ? scopeNames.join(", ") : "Not selected"],
+                  ["Budget", form.budget || "Not selected"],
+                  ["Start", form.timeline || "Not selected"],
+                  ["Estimated window", estimate],
+                ].map(([k, v]) => (
+                  <Box key={k} caption={k}>
+                    <div className="mt-1 font-mono text-[14px] leading-[1.55] text-ink">{v}</div>
+                  </Box>
+                ))}
+              </Ruled>
               {failed && (
-                <div role="alert" className="mt-4 text-[14px] text-[#FF7A93]">
-                  Something went wrong. Please try again or email <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
-                </div>
+                <p role="alert" className="mt-4 mb-0 text-[15px] font-semibold text-form">
+                  Something went wrong. Please try again or email{" "}
+                  <a className="underline" href={`mailto:${CONTACT.email}`}>
+                    {CONTACT.email}
+                  </a>
+                  .
+                </p>
               )}
             </div>
           )}
 
           {sent && (
-            <div className="mt-[34px] animate-[anIn_.35s_ease-out] rounded-[20px] border border-[rgba(6,214,160,.3)] bg-[rgba(6,214,160,.08)] p-8 text-center">
-              <div className="font-display text-[24px] font-bold">Request received. We&apos;ll call within one business day.</div>
-              <div className="mt-[10px] text-[14.5px] text-body">
-                Prefer email? Write to <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+            <div role="status" className="grid items-center gap-6 sm:grid-cols-[1fr_auto]">
+              <div>
+                <Heading as="h3">Request received. We&apos;ll call within one business day.</Heading>
+                <p className="mt-3 mb-0 text-[15.5px] text-graphite">
+                  Prefer email? Write to{" "}
+                  <a className="font-semibold text-form underline" href={`mailto:${CONTACT.email}`}>
+                    {CONTACT.email}
+                  </a>
+                  .
+                </p>
               </div>
+              <Stamp label="RECEIVED" sub={new Date().toLocaleDateString("en-US")} rot={-6} />
             </div>
           )}
+        </div>
 
-          <div className="mt-[30px] flex flex-wrap items-center justify-between gap-[14px]">
-            <button type="button" onClick={back} className="text-[14px] font-semibold text-dim hover:text-ink">
-              {sent ? "Start over" : step === 1 ? "Step 1 of 3" : "← Back"}
-            </button>
-            <button
-              type="button"
-              onClick={next}
-              disabled={busy}
-              className="rounded-[14px] bg-[linear-gradient(120deg,#00F0FF,#8B7CFF)] px-[30px] py-4 font-display text-[16px] font-bold text-on-accent shadow-[0_12px_36px_rgba(0,240,255,.3)] transition-transform duration-200 hover:-translate-y-[2px] hover:shadow-[0_16px_48px_rgba(0,240,255,.55)] disabled:opacity-70"
-            >
-              {sent ? "Submitted" : step === 3 ? "Get my call back" : "Continue"}
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-form px-4 py-4 sm:px-7">
+          <button type="button" onClick={back} className="text-[15px] font-semibold text-muted hover:text-ink disabled:hover:text-muted" disabled={!sent && step === 1}>
+            {sent ? "Start over" : step === 1 ? "Step 1 of 3" : "Back"}
+          </button>
+          <button type="button" onClick={next} disabled={busy || sent} className={btnInk}>
+            {sent ? "Submitted" : step === 3 ? "Get my call back" : "Continue"}
+          </button>
         </div>
       </div>
-    </section>
+    </Part>
   );
 }

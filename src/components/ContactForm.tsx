@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CONTACT } from "@/content/site";
 import { submitLead } from "@/lib/submitLead";
 import { useMountainTime } from "@/lib/useMountainTime";
+import { Box, Caption, Check, Heading, Ruled, Stamp, btnInk } from "./form";
 
 const OPTIONS = [
   "Aquila EHR/PMS demo",
@@ -21,6 +22,13 @@ const OPTIONS = [
   "UI/UX & branding",
 ];
 
+const FIELDS = [
+  ["name", "Full name", "text", "name"],
+  ["email", "Email", "email", "email"],
+  ["phone", "Phone", "tel", "tel"],
+  ["company", "Organization", "text", "organization"],
+] as const;
+
 const EMPTY = { name: "", email: "", phone: "", company: "", msg: "" };
 
 export function ContactForm() {
@@ -30,10 +38,8 @@ export function ContactForm() {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setF((s) => ({ ...s, [k]: e.target.value }));
-
-  const submit = async () => {
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (busy) return;
     setBusy(true);
     setFailed(false);
@@ -48,100 +54,141 @@ export function ContactForm() {
     setF(EMPTY);
   };
 
+  if (sent) {
+    return (
+      <div role="status" className="border-2 border-form p-6 sm:p-8">
+        <Stamp label="RECEIVED" sub={new Date().toLocaleDateString("en-US")} rot={-6} />
+        <Heading as="h3" className="mt-6">
+          Thanks — message received.
+        </Heading>
+        <p className="mt-3 mb-0 text-[16px] text-graphite">
+          Our team will get back to you shortly at <span className="font-mono text-ink">{f.email}</span>.
+        </p>
+        <button type="button" onClick={reset} className="mt-6 text-[15px] font-bold text-form underline underline-offset-4">
+          Send another message
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div
-      data-reveal=""
-      className="rounded-[28px] border border-[rgba(255,255,255,.11)] bg-[linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.02))] p-[clamp(24px,3.2vw,40px)] shadow-[0_40px_100px_rgba(0,0,0,.5),inset_0_1px_0_rgba(255,255,255,.12)] backdrop-blur-[16px]"
-    >
-      {!sent ? (
-        <>
-          <div className="font-display text-[24px] font-bold tracking-[-.02em]">Send us a message</div>
-          <div className="mt-2 text-[14px] text-dim">Request a demo or tell us about your project.</div>
-          <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] gap-3">
-            <input aria-label="Full name" autoComplete="name" value={f.name} onChange={set("name")} placeholder="Full name" className="field" />
-            <input aria-label="Email" type="email" autoComplete="email" value={f.email} onChange={set("email")} placeholder="Email" className="field" />
-            <input aria-label="Phone" type="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} placeholder="Phone" className="field" />
-            <input aria-label="Organization" autoComplete="organization" value={f.company} onChange={set("company")} placeholder="Organization" className="field" />
-          </div>
-          <div className="mt-5 text-[12.5px] font-bold tracking-[.1em] text-subtle uppercase">I’m interested in</div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {OPTIONS.map((label) => {
-              const on = picked.includes(label);
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => setPicked((p) => (on ? p.filter((x) => x !== label) : p.concat(label)))}
-                  className={`rounded-full border px-[14px] py-[9px] text-[13.5px] font-semibold transition-all duration-200 hover:border-[rgba(0,240,255,.45)] ${
-                    on
-                      ? "border-[rgba(0,240,255,.55)] bg-[rgba(0,240,255,.12)] text-white"
-                      : "border-[rgba(255,255,255,.12)] bg-[rgba(255,255,255,.03)] text-body-2"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <textarea
-            aria-label="Message"
-            value={f.msg}
-            onChange={set("msg")}
-            placeholder="How can we help?"
-            rows={5}
-            className="field mt-5 w-full resize-y leading-[1.6]"
-          />
-          {failed && (
-            <div role="alert" className="mt-4 text-[14px] text-[#FF7A93]">
-              Something went wrong. Please try again or email <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
-            </div>
-          )}
-          <div className="mt-[22px] flex flex-wrap items-center justify-between gap-[14px]">
-            <div className="text-[12.5px] text-[#6E7890]">
-              By submitting you agree to our <Link href="/privacy-policy">Privacy Policy</Link>.
-            </div>
-            <button
-              type="button"
-              onClick={submit}
-              disabled={busy}
-              className="rounded-[14px] bg-[linear-gradient(120deg,#00F0FF,#8B7CFF)] px-[30px] py-4 font-display text-[16px] font-bold text-on-accent shadow-[0_12px_36px_rgba(0,240,255,.3)] transition-transform duration-200 hover:-translate-y-[2px] hover:shadow-[0_16px_48px_rgba(0,240,255,.55)] disabled:opacity-70"
-            >
-              Send message
-            </button>
-          </div>
-        </>
-      ) : (
-        <div className="animate-[anIn_.4s_ease-out] px-[10px] py-[30px] text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-success text-[26px] text-success shadow-[0_0_30px_rgba(6,214,160,.35)]">
-            ✓
-          </div>
-          <div className="mt-[22px] font-display text-[26px] font-bold">Thanks — message received.</div>
-          <div className="mt-[10px] text-[15px] text-body">Our team will get back to you shortly at {f.email}.</div>
-          <button type="button" onClick={reset} className="mt-[22px] inline-block text-[14px] font-semibold text-cyan">
-            Send another message
-          </button>
+    <form onSubmit={submit} className="border-2 border-form">
+      <div className="border-b border-form p-4 sm:p-6">
+        <Heading as="h3">Send us a message</Heading>
+        <p className="mt-1 mb-0 text-[15px] text-muted">Request a demo or tell us about your project.</p>
+      </div>
+      <div className="grid sm:grid-cols-2">
+        {FIELDS.map(([key, label, type, ac], i) => (
+          <label key={key} className={`block border-b border-form p-4 sm:px-6 ${i % 2 === 0 ? "sm:border-r" : ""}`}>
+            <Caption>{label}</Caption>
+            <input
+              type={type}
+              autoComplete={ac}
+              value={f[key]}
+              onChange={(e) => setF((s) => ({ ...s, [key]: e.target.value }))}
+              placeholder={label}
+              className="field mt-1"
+            />
+          </label>
+        ))}
+      </div>
+      <fieldset className="m-0 border-0 border-b border-form p-4 sm:px-6">
+        <legend className="caption float-left mb-3 w-full p-0 text-[12.5px]">I’m interested in</legend>
+        <div className="clear-both grid gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+          {OPTIONS.map((label) => {
+            const on = picked.includes(label);
+            return (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setPicked((p) => (on ? p.filter((x) => x !== label) : p.concat(label)))}
+                className="flex items-center gap-2.5 py-1 text-left text-[15px] text-ink hover:text-form"
+              >
+                <Check on={on} />
+                {label}
+              </button>
+            );
+          })}
         </div>
+      </fieldset>
+      <label className="block border-b border-form p-4 sm:px-6">
+        <Caption>How can we help?</Caption>
+        <textarea
+          value={f.msg}
+          onChange={(e) => setF((s) => ({ ...s, msg: e.target.value }))}
+          placeholder="How can we help?"
+          rows={5}
+          className="field mt-1 resize-y leading-[1.6]"
+        />
+      </label>
+      {failed && (
+        <p role="alert" className="m-0 border-b border-form px-4 py-3 text-[15px] font-semibold text-form sm:px-6">
+          Something went wrong. Please try again or email{" "}
+          <a className="underline" href={`mailto:${CONTACT.email}`}>
+            {CONTACT.email}
+          </a>
+          .
+        </p>
       )}
-    </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-6">
+        <p className="m-0 text-[13.5px] text-muted">
+          By submitting you agree to our{" "}
+          <Link href="/privacy-policy" className="text-form underline underline-offset-2">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+        <button type="submit" disabled={busy} className={btnInk}>
+          Send message
+        </button>
+      </div>
+    </form>
   );
 }
 
-export function KalispellCard() {
+const linkRow = "flex items-center justify-between gap-3 hover:bg-form-tint";
+
+export function ContactDetails() {
   const mtTime = useMountainTime();
-  const pin = "absolute top-1/2 right-10 -mt-[7px] h-[14px] w-[14px] rounded-full";
   return (
-    <div className="relative min-h-[200px] overflow-hidden rounded-3xl border border-[rgba(0,240,255,.24)] bg-[linear-gradient(150deg,rgba(0,240,255,.10),rgba(108,77,246,.08))] p-7">
-      <div className={`${pin} bg-cyan shadow-[0_0_20px_#00F0FF]`} />
-      <div className={`${pin} animate-[anRing_2.4s_ease-out_infinite] border-[1.5px] border-cyan`} />
-      <div className={`${pin} animate-[anRing_2.4s_ease-out_infinite] border-[1.5px] border-cyan [animation-delay:1.2s]`} />
-      <div className="inline-flex items-center gap-2 text-[12.5px] font-bold tracking-[.1em] text-cyan-light uppercase">
-        Kalispell, MT · {mtTime} local
-      </div>
-      <div className="mt-[14px] max-w-[24ch] font-display text-[22px] leading-[1.35] font-bold">{CONTACT.address}</div>
-      <a href={CONTACT.mapsUrl} className="mt-4 inline-flex text-[14px] font-bold">
-        Open in Maps →
+    <Ruled>
+      <Box caption={<>Kalispell, MT · {mtTime || "—"} local</>}>
+        <p className="mt-3 mb-0 max-w-[24ch] text-[22px] leading-[1.25] font-extrabold text-ink stretch-head">{CONTACT.address}</p>
+        <a href={CONTACT.mapsUrl} className="mt-4 inline-block text-[15px] font-bold text-form underline underline-offset-4">
+          Open in Maps
+        </a>
+      </Box>
+      <a href={CONTACT.phoneHref} className={`${linkRow} p-4 sm:p-5`}>
+        <span>
+          <Caption>Contact #</Caption>
+          <span className="mt-1 block font-mono text-[20px] text-ink">{CONTACT.phone}</span>
+        </span>
       </a>
-    </div>
+      <a href={`mailto:${CONTACT.email}`} className={`${linkRow} p-4 sm:p-5`}>
+        <span className="min-w-0">
+          <Caption>Email</Caption>
+          <span className="mt-1 block font-mono text-[clamp(15px,1.6vw,18px)] text-ink [overflow-wrap:anywhere]">{CONTACT.email}</span>
+        </span>
+      </a>
+      <div className="grid grid-cols-2 p-0">
+        <Box caption="Fax #" className="border-r border-form">
+          <div className="mt-1 font-mono text-[18px] text-ink">{CONTACT.fax}</div>
+        </Box>
+        <Box caption="Follow">
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[15px] font-bold">
+            <a className="text-ink underline underline-offset-4 hover:text-form" href={CONTACT.linkedin}>
+              LinkedIn
+            </a>
+            <a className="text-ink underline underline-offset-4 hover:text-form" href={CONTACT.instagram}>
+              Instagram
+            </a>
+          </div>
+        </Box>
+      </div>
+      <a href={CONTACT.website} className="p-4 font-mono text-[13.5px] text-muted hover:text-ink sm:px-5">
+        Website: https://alphanetssolutions.com/
+      </a>
+    </Ruled>
   );
 }

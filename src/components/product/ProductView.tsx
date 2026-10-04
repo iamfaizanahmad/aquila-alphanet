@@ -1,254 +1,194 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { PRODUCTS, PRODUCT_LINKS, type ProductKey } from "@/content/products";
+import { useState } from "react";
+import { Box, Caption, Check, Heading, Part, Ruled, btnInk, btnOutline, btnPaper } from "@/components/form";
+import { PRODUCTS, PRODUCT_INK, PRODUCT_LINKS, type ProductKey } from "@/content/products";
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
-/** Single template for all five product pages (design: Product.dc.html). Accent colors come in via CSS vars. */
+/** One template for all five products (design: Product.dc.html), printed in the product's own form ink. */
 export function ProductView({ productKey }: { productKey: ProductKey }) {
   const p = PRODUCTS[productKey];
+  const ink = PRODUCT_INK[productKey];
   const all = p.sections;
-  const titles = useMemo(() => all.flatMap((s) => s.groups.map((g) => g.t)), [all]);
+  const titles = all.flatMap((s) => s.groups.map((g) => g.t));
 
   const [tab, setTab] = useState("All");
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setTick((h) => h + 1), 1300);
-    return () => clearInterval(t);
-  }, []);
-  const hi = tick % titles.length;
-
   const tabs = ["All", ...all.map((s) => s.cat)].map((label) => ({
     label,
     count: label === "All" ? titles.length : all.find((s) => s.cat === label)!.groups.length,
   }));
-  const sections = all.map((s, i) => ({ s, i })).filter((x) => tab === "All" || x.s.cat === tab);
+  const sections = tab === "All" ? all : all.filter((s) => s.cat === tab);
   const others = PRODUCT_LINKS.filter((l) => l.key !== productKey);
 
-  const vars = { "--accent": p.accent, "--glow": p.glow, "--spot": p.spot } as React.CSSProperties;
-
   return (
-    <div className="relative" style={vars}>
-      <div className="pointer-events-none absolute top-0 right-0 left-0 h-[900px] bg-[radial-gradient(800px_520px_at_82%_-8%,var(--glow),transparent_65%),radial-gradient(600px_420px_at_0%_10%,rgba(108,77,246,.14),transparent_60%)]" />
+    <div style={{ ["--form" as string]: ink.ink, ["--form-tint" as string]: ink.tint }}>
+      {/* Hero form */}
+      <section className="px-gutter pt-6 pb-16 sm:pt-8">
+        <div className="sheet lg:px-14">
+          <nav aria-label="Breadcrumb" className="caption flex items-center gap-2 pb-3 text-[13px]">
+            <Link href="/#products" className="underline-offset-4 hover:underline">
+              Our Products
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold">{p.name}</span>
+          </nav>
+          <Ruled className="border-t-2 lg:grid-cols-12">
+            <Box caption="Product" className="bg-form-tint lg:col-span-8">
+              <h1 className="m-0 mt-3 text-[clamp(44px,6.4vw,96px)] leading-[.9] font-black tracking-[-.02em] text-ink uppercase stretch-display">
+                {p.name}
+              </h1>
+              <p className="mt-5 mb-0 max-w-[38ch] text-[clamp(19px,1.9vw,24px)] leading-[1.3] font-bold text-form stretch-head">{p.tagline}</p>
+            </Box>
 
-      <section className="relative px-gutter pt-[clamp(48px,6vw,96px)] pb-[clamp(48px,6vw,88px)]">
-        <div className="container-site grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-center gap-[clamp(32px,4.5vw,72px)]">
-          <div data-stagger="">
-            <div className="flex items-center gap-[10px] text-[13px] text-subtle">
-              <Link href="/#products" className="text-subtle hover:text-ink">
-                Our Products
-              </Link>
-              <span className="opacity-50">/</span>
-              <span className="font-semibold text-[var(--accent)]">{p.name}</span>
-            </div>
-            <h1 className="mt-[22px] mb-0 font-display text-[clamp(40px,5.6vw,76px)] leading-[1.02] font-extrabold tracking-[-.035em]">
-              {p.name}
-            </h1>
-            <p className="mt-[18px] mb-0 max-w-[34ch] font-display text-[clamp(18px,1.9vw,23px)] leading-[1.4] font-medium tracking-[-.01em] text-[var(--accent)]">
-              {p.tagline}
-            </p>
-            {p.intro.map((para) => (
-              <p key={para} className="mt-[18px] mb-0 max-w-[62ch] text-[16px] leading-[1.72] text-body">
-                {para}
-              </p>
-            ))}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="relative inline-flex items-center overflow-hidden rounded-[14px] bg-[linear-gradient(120deg,var(--accent),#8B7CFF)] px-7 py-4 font-display text-[16px] font-bold text-on-accent shadow-[0_14px_40px_var(--glow)] hover:-translate-y-[2px] hover:text-on-accent"
-              >
-                Request a Demo
-                <span className="absolute top-0 bottom-0 left-0 w-[38%] animate-[anSweep_3.6s_ease-in-out_infinite] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent)]" />
-              </Link>
-              <a
-                href="#features"
-                className="inline-flex items-center gap-[10px] rounded-[14px] border border-[rgba(255,255,255,.16)] bg-[rgba(255,255,255,.04)] px-6 py-4 font-display text-[16px] font-semibold text-ink hover:border-[rgba(255,255,255,.35)] hover:text-white"
-              >
-                Explore features <span className="font-mono">↓</span>
-              </a>
-            </div>
-          </div>
-
-          <div data-reveal="200" className="relative">
-            <div className="absolute -inset-x-[4%] -inset-y-[6%] rounded-[36px] bg-[radial-gradient(circle_at_70%_20%,var(--glow),transparent_60%),radial-gradient(circle_at_15%_85%,rgba(108,77,246,.25),transparent_60%)] blur-[36px]" />
-            <div className="relative overflow-hidden rounded-[26px] border border-[rgba(255,255,255,.12)] bg-[rgba(7,10,20,.82)] shadow-[0_40px_100px_rgba(0,0,0,.6),inset_0_1px_0_rgba(255,255,255,.12)] backdrop-blur-[16px]">
-              <div className="flex items-center justify-between gap-3 border-b border-[rgba(255,255,255,.08)] px-5 py-4">
-                <div className="flex items-center gap-[10px]">
-                  <span className="h-[10px] w-[10px] rounded-[3px] bg-[var(--accent)] shadow-[0_0_14px_var(--accent)]" />
-                  <span className="font-display text-[14.5px] font-bold">Platform map</span>
-                </div>
-                <span className="font-mono text-[12px] text-subtle">{titles.length} modules</span>
-              </div>
-              <div className="flex flex-wrap gap-2 p-5">
-                {titles.map((t, i) => {
-                  const on = i === hi;
-                  const near = i === (hi + titles.length - 1) % titles.length;
-                  return (
-                    <span
-                      key={t}
-                      className="rounded-[10px] border px-3 py-2 text-[12.5px] font-semibold transition-all duration-500 ease-in-out"
-                      style={{
-                        borderColor: on ? p.accent : "rgba(255,255,255,.09)",
-                        background: on ? p.spot : near ? "rgba(255,255,255,.05)" : "rgba(255,255,255,.025)",
-                        color: on ? "#FFFFFF" : "#9BA5B9",
-                        boxShadow: on ? "0 0 22px " + p.glow : "none",
-                      }}
-                    >
-                      {t}
-                    </span>
-                  );
-                })}
-              </div>
-              <div className="flex flex-wrap gap-2 border-t border-[rgba(255,255,255,.08)] px-5 py-[14px]">
-                {p.badges.map((bd) => (
-                  <span key={bd} className="rounded-full bg-[rgba(255,255,255,.05)] px-[10px] py-[6px] font-mono text-[11.5px] text-[#B6C0D3]">
-                    {bd}
+            <Box caption="Platform map" className="lg:col-span-4 lg:row-span-3">
+              <div className="mt-1 font-mono text-[12px] text-muted">{titles.length} modules</div>
+              <ul className="m-0 mt-3 grid list-none gap-x-4 gap-y-1.5 p-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {titles.map((t) => (
+                  <li key={t} className="flex items-start gap-2 text-[13px] leading-[1.35] text-ink">
+                    <Check on className="mt-[1px]" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-5 flex flex-wrap gap-2 border-t border-dashed border-form pt-4">
+                {p.badges.map((b) => (
+                  <span key={b} className="border border-form px-2 py-0.5 font-mono text-[12px] text-ink">
+                    {b}
                   </span>
                 ))}
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+            </Box>
 
-      <section id="features" className="relative border-t border-[rgba(255,255,255,.06)] px-gutter py-[clamp(48px,6vw,96px)]">
-        <div className="container-site">
-          <div data-reveal="" className="kicker text-[var(--accent)]">
-            Capabilities
-          </div>
-          <h2 data-reveal="80" className="mt-4 mb-0 font-display text-[clamp(30px,4vw,50px)] leading-[1.08] font-bold tracking-[-.03em]">
-            Everything inside {p.name}
-          </h2>
-
-          {all.length > 1 && (
-            <div
-              role="tablist"
-              aria-label="Capability categories"
-              className="sticky top-[84px] z-20 mt-[30px] flex flex-wrap gap-1 rounded-2xl border border-[rgba(255,255,255,.08)] bg-[rgba(6,8,16,.86)] p-[7px] shadow-[0_16px_40px_rgba(0,0,0,.4)] backdrop-blur-[14px]"
-            >
-              {tabs.map((t) => {
-                const on = t.label === tab;
-                return (
-                  <button
-                    key={t.label}
-                    type="button"
-                    role="tab"
-                    aria-selected={on}
-                    onClick={() => setTab(t.label)}
-                    className={`flex items-center gap-2 rounded-[11px] px-[15px] py-[10px] text-[14px] font-semibold transition-[background,color] duration-[250ms] hover:text-white ${
-                      on ? "bg-[var(--accent)] text-on-accent" : "bg-transparent text-body-2"
-                    }`}
-                  >
-                    {t.label}
-                    <span className="font-mono text-[11px] opacity-65">{t.count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {sections.map(({ s, i }) => (
-            <div key={s.cat} className="mt-14">
-              <div data-reveal="" className="flex flex-wrap items-baseline gap-[14px]">
-                <span className="font-mono text-[13px] text-[var(--accent)]">{pad(i + 1)}</span>
-                <h3 className="m-0 font-display text-[clamp(22px,2.6vw,30px)] font-bold tracking-[-.02em]">{s.cat}</h3>
-              </div>
-              {s.d && (
-                <p data-reveal="60" className="mt-3 mb-0 max-w-[72ch] text-[15.5px] leading-[1.7] text-muted">
-                  {s.d}
+            <Box caption="Description" className="lg:col-span-8">
+              {p.intro.map((para) => (
+                <p key={para} className="mt-3 mb-0 max-w-[66ch] text-[16px] leading-[1.7] text-graphite">
+                  {para}
                 </p>
-              )}
-              <div data-stagger="" className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,330px),1fr))] gap-4">
-                {s.groups.map((g) => (
-                  <div
-                    key={g.t}
-                    data-spot=""
-                    data-tilt="3"
-                    className="flex flex-col rounded-[22px] border border-[rgba(255,255,255,.09)] bg-[rgba(255,255,255,.02)] bg-[image:radial-gradient(380px_circle_at_var(--mx,-999px)_var(--my,-999px),var(--spot),transparent_45%),linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.012))] p-[26px] transition-[transform,border-color] duration-[250ms,300ms] hover:border-[rgba(255,255,255,.2)]"
-                  >
-                    <h4 className="m-0 font-display text-[19px] leading-[1.25] font-bold tracking-[-.015em]">{g.t}</h4>
-                    {g.d && <p className="mt-[10px] mb-0 text-[14px] leading-[1.65] text-muted">{g.d}</p>}
-                    <div className="mt-4 flex flex-col gap-[9px]">
-                      {g.items.map((it) => (
-                        <div key={it} className="flex items-start gap-[11px] text-[14px] leading-[1.5] text-[#C9D0DD]">
-                          <span className="mt-[7px] h-[6px] w-[6px] flex-none rounded-[2px] bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]" />
-                          <span>{it}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {g.note && (
-                      <p className="mt-[18px] mb-0 border-t border-[rgba(255,255,255,.08)] pt-4 text-[13.5px] leading-[1.65] text-dim">
-                        {g.note}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative px-gutter py-[clamp(48px,6vw,96px)]">
-        <div
-          data-reveal=""
-          className="relative container-site overflow-hidden rounded-[30px] border border-[rgba(255,255,255,.12)] bg-[linear-gradient(140deg,var(--glow),rgba(108,77,246,.16)_55%,rgba(255,255,255,.02))] p-[clamp(30px,4.5vw,64px)] shadow-[0_40px_100px_rgba(0,0,0,.5),inset_0_1px_0_rgba(255,255,255,.14)]"
-        >
-          <div className="kicker text-ink opacity-80">{p.closingKicker}</div>
-          {p.closing.map((cl) => (
-            <p
-              key={cl}
-              className="mt-[18px] mb-0 max-w-[60ch] font-display text-[clamp(19px,2.2vw,27px)] leading-[1.45] font-medium tracking-[-.015em] text-pretty text-strong"
-            >
-              {cl}
-            </p>
-          ))}
-          <div className="mt-[30px] flex flex-wrap gap-3">
-            <Link
-              href="/contact"
-              className="rounded-[14px] bg-white px-7 py-4 font-display text-[16px] font-bold text-on-accent shadow-[0_14px_40px_rgba(0,0,0,.35)] hover:bg-[#E6FDFF] hover:text-on-accent"
-            >
-              Request a Demo
-            </Link>
-            <Link
-              href="/contact"
-              className="rounded-[14px] border border-[rgba(255,255,255,.3)] px-6 py-4 font-display text-[16px] font-semibold text-white hover:border-white hover:text-white"
-            >
-              Talk to our team
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative px-gutter pt-0 pb-[clamp(60px,7vw,110px)]">
-        <div className="container-site">
-          <div data-reveal="" className="font-display text-[22px] font-bold tracking-[-.02em]">
-            More from AlphaNet
-          </div>
-          <div data-stagger="" className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-[14px]">
-            {others.map((o) => {
-              const op = PRODUCTS[o.key];
-              return (
-                <Link
-                  key={o.key}
-                  href={o.href}
-                  data-spot=""
-                  className="flex flex-col gap-[10px] rounded-[20px] border border-[rgba(255,255,255,.09)] bg-[rgba(255,255,255,.025)] bg-[image:radial-gradient(300px_circle_at_var(--mx,-999px)_var(--my,-999px),rgba(255,255,255,.07),transparent_50%)] p-[22px] text-ink transition-[border-color,transform] duration-300 hover:-translate-y-[3px] hover:border-[rgba(255,255,255,.22)] hover:text-white"
-                >
-                  <span className="h-[10px] w-[10px] rounded-[3px]" style={{ background: op.accent, boxShadow: `0 0 12px ${op.accent}` }} />
-                  <span className="font-display text-[16.5px] font-bold">{op.name}</span>
-                  <span className="text-[13px] leading-[1.55] text-dim">{o.tag}</span>
-                  <span className="mt-auto pt-[6px] text-[13px] font-bold" style={{ color: op.accent }}>
-                    View product →
-                  </span>
+              ))}
+            </Box>
+            <Box caption="Next action" className="lg:col-span-8">
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Link href="/contact" className={btnInk}>
+                  Request a Demo
                 </Link>
+                <a href="#features" className={btnOutline}>
+                  Explore features ↓
+                </a>
+              </div>
+            </Box>
+          </Ruled>
+        </div>
+      </section>
+
+      {/* Capabilities */}
+      <Part id="features" label="Capabilities" className="pb-16">
+        <Heading>Everything inside {p.name}</Heading>
+
+        {all.length > 1 && (
+          <div
+            role="tablist"
+            aria-label="Capability categories"
+            className="sticky top-16 z-20 mt-6 flex flex-wrap border-t-2 border-l border-form bg-paper"
+          >
+            {tabs.map((t) => {
+              const on = t.label === tab;
+              return (
+                <button
+                  key={t.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setTab(t.label)}
+                  className={`flex flex-1 items-center justify-center gap-2 border-r border-b border-form px-3 py-2.5 text-[15px] font-bold whitespace-nowrap stretch-head ${
+                    on ? "bg-ink text-white" : "text-ink hover:bg-form-tint"
+                  }`}
+                >
+                  {t.label}
+                  <span className={`font-mono text-[11.5px] font-medium ${on ? "text-white/70" : "text-form"}`}>{t.count}</span>
+                </button>
               );
             })}
           </div>
+        )}
+
+        {sections.map((s) => (
+          <div key={s.cat} className="mt-10">
+            <Heading as="h3" className="!text-[clamp(24px,2.6vw,34px)]">
+              {s.cat}
+            </Heading>
+            {s.d && <p className="mt-2 mb-0 max-w-[72ch] text-[16px] leading-[1.65] text-graphite">{s.d}</p>}
+            <Ruled className="mt-5 md:grid-cols-2 xl:grid-cols-3">
+              {s.groups.map((g) => (
+                <div key={g.t} className="flex flex-col p-4 sm:p-5">
+                  <h4 className="m-0 text-[20px] leading-[1.15] font-extrabold text-ink stretch-head">{g.t}</h4>
+                  {g.d && <p className="mt-2 mb-0 text-[14.5px] leading-[1.6] text-graphite">{g.d}</p>}
+                  <ul className="m-0 mt-4 flex-1 list-none space-y-1.5 p-0">
+                    {g.items.map((it) => (
+                      <li key={it} className="flex items-start gap-2.5 font-mono text-[13px] leading-[1.5] text-ink">
+                        <Check on className="mt-[2px]" />
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                  {g.note && (
+                    <p className="mt-4 mb-0 border-t border-dashed border-form pt-3 text-[13.5px] leading-[1.6] text-muted">
+                      {g.note}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </Ruled>
+          </div>
+        ))}
+      </Part>
+
+      {/* Closing statement */}
+      <section className="px-gutter pb-16">
+        <div className="sheet lg:px-14">
+          <div className="bg-ink p-6 text-white sm:p-10">
+            <Caption className="!text-white/70 text-[13px]">{p.closingKicker}</Caption>
+            {p.closing.map((cl) => (
+              <p key={cl} className="mt-4 mb-0 max-w-[60ch] text-[clamp(19px,2vw,26px)] leading-[1.4] font-semibold text-pretty stretch-head">
+                {cl}
+              </p>
+            ))}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/contact" className={`${btnPaper} focus-visible:outline-white`}>
+                Request a Demo
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center rounded-[3px] border-2 border-white/60 px-6 py-3 text-[16px] font-bold text-white stretch-head hover:border-white focus-visible:outline-white"
+              >
+                Talk to our team
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Cross-links */}
+      <Part label="More from AlphaNet">
+        <Heading as="h3">More from AlphaNet</Heading>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {others.map((o) => {
+            const oi = PRODUCT_INK[o.key];
+            return (
+              <Link
+                key={o.key}
+                href={o.href}
+                className="group flex flex-col border-2 bg-paper p-4 hover:bg-[var(--form-tint)] sm:p-5"
+                style={{ borderColor: oi.ink, ["--form" as string]: oi.ink, ["--form-tint" as string]: oi.tint }}
+              >
+                <Caption>Product</Caption>
+                <span className="mt-2 text-[19px] leading-tight font-extrabold text-ink stretch-head">{PRODUCTS[o.key].name}</span>
+                <span className="mt-2 text-[14px] leading-[1.55] text-graphite">{o.tag}</span>
+                <span className="mt-auto pt-4 text-[14.5px] font-bold text-form underline-offset-4 group-hover:underline">View product</span>
+              </Link>
+            );
+          })}
+        </div>
+      </Part>
     </div>
   );
 }
