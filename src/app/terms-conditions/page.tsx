@@ -85,7 +85,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms & Conditions"
-      tone="violet"
+      tone="blue"
       intro="Welcome to the AlphaNet Solutions website. By accessing or using our website and services, you agree to comply with and be bound by the following Terms and Conditions. If you do not agree with these terms, please do not use our website."
       sections={SECTIONS}
     />

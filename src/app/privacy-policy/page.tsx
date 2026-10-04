@@ -124,7 +124,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      tone="cyan"
+      tone="red"
       intro="At AlphaNet Solutions, we value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, and safeguard your data when you visit our website and use our services."
       sections={SECTIONS}
     />

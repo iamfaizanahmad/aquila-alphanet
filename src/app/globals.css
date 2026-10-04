@@ -1,70 +1,74 @@
 @import "tailwindcss";
 
-/* Design tokens — design_handoff_alphanet_website/README.md § Design Tokens */
-@theme {
-  --font-display: var(--font-outfit), "Outfit", sans-serif;
-  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
+/*
+ * Claim-form design system.
+ * The site is set like a CMS-1500: boxes ruled in dropout ink, small ink captions,
+ * navy "typed" data. Product pages swap the dropout ink via --form / --form-tint.
+ */
+:root {
+  --form: #d3343b; /* dropout red */
+  --form-tint: #fdf3f2;
+}
 
-  --color-bg: #04050a;
-  --color-ink: #e8ecf4; /* text primary */
-  --color-strong: #f2f5fa;
-  --color-body: #a3adc0;
-  --color-body-2: #a9b2c4;
-  --color-muted: #98a2b6;
-  --color-subtle: #7e89a0;
-  --color-faint: #5b657a;
-  --color-soft: #c3cbda;
-  --color-dim: #8a94a8;
-  --color-on-accent: #04070e;
+@theme inline {
+  --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-mono: var(--font-plex), "IBM Plex Mono", ui-monospace, monospace;
 
-  --color-cyan: #00f0ff;
-  --color-cyan-light: #8ff6ff;
-  --color-cyan-hover: #7df9ff;
-  --color-indigo: #6c4df6;
-  --color-violet: #8b7cff;
-  --color-purple: #c77dff;
-  --color-success: #06d6a0;
+  --color-paper: #fcfdfc;
+  --color-ink: #17233f; /* typed navy */
+  --color-ink-deep: #0c1530;
+  --color-graphite: #3c4458; /* body */
+  --color-muted: #5a6270;
+  --color-paid: #1b7a4b;
+  --color-form: var(--form);
+  --color-form-tint: var(--form-tint);
+}
 
-  --animate-pulse-dot: anPulse 1.8s ease-in-out infinite;
+/* Condensed Archivo widths used for display + captions */
+@utility stretch-caption {
+  font-stretch: 80%;
+}
+@utility stretch-display {
+  font-stretch: 72%;
+}
+@utility stretch-head {
+  font-stretch: 82%;
 }
 
 @utility px-gutter {
-  padding-inline: clamp(18px, 4vw, 56px);
+  padding-inline: clamp(16px, 4vw, 56px);
 }
-@utility py-section {
-  padding-block: clamp(64px, 8vw, 124px);
-}
-@utility container-site {
-  max-width: 1180px;
+@utility sheet {
+  max-width: 1240px;
   margin-inline: auto;
 }
-@utility kicker {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+
+/* Small form-box caption in dropout ink */
+@utility caption {
+  font-size: 11.5px;
+  line-height: 1.3;
+  font-stretch: 80%;
+  color: var(--form);
 }
-@utility text-gradient {
-  background: linear-gradient(100deg, #00f0ff 10%, #8b7cff 55%, #c77dff 95%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+
+/* Form field: bottom-ruled, typed in mono ink */
 @utility field {
-  padding: 16px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(4, 6, 14, 0.6);
-  color: #e8ecf4;
-  font-family: var(--font-sans);
+  width: 100%;
+  padding: 6px 0 8px;
+  border: 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--form) 55%, transparent);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
   font-size: 15px;
   outline: none;
-  &:focus {
-    border-color: rgba(0, 240, 255, 0.55);
-  }
+  border-radius: 0;
   &::placeholder {
-    color: #5b657a;
+    color: #8a909c;
+  }
+  &:focus {
+    border-bottom: 2px solid var(--color-ink);
+    padding-bottom: 7px;
   }
 }
 
@@ -72,9 +76,8 @@
   html,
   body {
     margin: 0;
-    padding: 0;
-    background: #04050a;
-    color: #e8ecf4;
+    background: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
@@ -82,58 +85,43 @@
     scroll-behavior: smooth;
   }
   a {
-    color: #00f0ff;
+    color: inherit;
     text-decoration: none;
   }
-  a:hover {
-    color: #7df9ff;
-  }
   ::selection {
-    background: rgba(0, 240, 255, 0.3);
+    background: color-mix(in srgb, var(--form) 22%, transparent);
   }
-  select option {
-    background: #0a0d1a;
-    color: #e8ecf4;
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
   }
   button {
     cursor: pointer;
   }
 }
 
-/* Scroll reveal: hidden before first paint (class set by inline head script), revealed by <Motion/>. */
-.an-js [data-reveal]:not([data-shown]),
-.an-js [data-stagger] > :not([data-shown]) {
-  opacity: 0;
+/* The one orchestrated moment per form: the rubber stamp */
+@keyframes stamp {
+  0% { opacity: 0; transform: rotate(var(--rot, -9deg)) scale(2.2); }
+  70% { opacity: 1; transform: rotate(var(--rot, -9deg)) scale(0.94); }
+  100% { opacity: 0.92; transform: rotate(var(--rot, -9deg)) scale(1); }
 }
-
-@keyframes anFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-@keyframes anPulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 1; }
-}
-@keyframes anSweep {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(320%); }
-}
-@keyframes anSpin {
-  to { transform: rotate(360deg); }
-}
-@keyframes anMarquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-@keyframes anFill {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-@keyframes anIn {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes typeIn {
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes anRing {
-  0% { transform: scale(0.6); opacity: 0.8; }
-  100% { transform: scale(2.6); opacity: 0; }
+@keyframes caret {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+  }
 }

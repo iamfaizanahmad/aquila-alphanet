@@ -1,92 +1,56 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { Heading, Part } from "@/components/form";
 import { RCM } from "@/content/home";
 
-/** 16 RCM steps; a highlight travels through them every 650ms (with three idle beats at the end). */
+/** The RCM lifecycle is a real sequence, so it's set like box 24's numbered service lines. */
 export function Rcm() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % (RCM.length + 3)), 650);
-    return () => clearInterval(t);
-  }, []);
+  const rows = RCM.map((r) => r.split("|") as [string, string?]);
+  const half = Math.ceil(rows.length / 2);
+  const cols = [rows.slice(0, half), rows.slice(half)];
 
   return (
-    <section
-      id="rcm"
-      className="relative z-[1] border-t border-[rgba(255,255,255,.06)] bg-[linear-gradient(180deg,rgba(108,77,246,.07),transparent_70%)] px-gutter py-section"
-    >
-      <div className="container-site">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,420px),1fr))] items-end gap-8">
-          <div>
-            <div data-reveal="" className="kicker text-purple">
-              02 — Revenue Cycle
-            </div>
-            <h2
-              data-reveal="80"
-              className="mt-4 mb-0 font-display text-[clamp(30px,4.2vw,52px)] leading-[1.08] font-bold tracking-[-.03em]"
-            >
-              End-to-End Revenue Cycle Management (RCM)
-            </h2>
-          </div>
-          <div data-stagger="">
-            <p className="m-0 text-[15.5px] leading-[1.7] text-body">
-              We provide comprehensive Revenue Cycle Management services designed to optimize the complete financial
-              lifecycle of healthcare organizations—from patient registration and insurance verification to claim
-              submission, payment posting, denial management, and accounts receivable follow-up.
-            </p>
-            <p className="mt-[14px] mb-0 text-[15.5px] leading-[1.7] text-body">
-              Our RCM services combine healthcare operational expertise, technology, EDI workflows, and revenue-cycle
-              analytics to help practices improve collections, reduce claim delays, and maintain greater visibility into
-              their financial performance.
-            </p>
-          </div>
-        </div>
-        <div data-reveal="" className="mt-11 text-[13px] font-bold tracking-[.12em] text-subtle uppercase">
-          Our RCM Services Include
-        </div>
-        <div data-stagger="" className="mt-[18px] grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-[10px]">
-          {RCM.map((r, i) => {
-            const [label, code] = r.split("|");
-            const on = i === idx;
-            const done = i < idx;
-            return (
-              <div
-                key={label}
-                className="relative flex items-start gap-[14px] rounded-[15px] border py-4 pr-4 pl-[14px] transition-all duration-[450ms] ease-in-out"
-                style={{
-                  borderColor: on ? "rgba(199,125,255,.6)" : done ? "rgba(139,124,255,.22)" : "rgba(255,255,255,.07)",
-                  background: on ? "rgba(199,125,255,.14)" : done ? "rgba(139,124,255,.06)" : "rgba(255,255,255,.02)",
-                  boxShadow: on ? "0 0 30px rgba(199,125,255,.25)" : "none",
-                }}
-              >
-                <span
-                  className="flex h-7 w-7 flex-none items-center justify-center rounded-[9px] font-mono text-[11.5px] font-semibold transition-all duration-[450ms]"
-                  style={{
-                    background: on
-                      ? "linear-gradient(140deg,#C77DFF,#8B7CFF)"
-                      : done
-                        ? "rgba(139,124,255,.2)"
-                        : "rgba(255,255,255,.06)",
-                    color: on ? "#0A0614" : done ? "#CFC6FF" : "#6E7890",
-                  }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0">
-                  <div
-                    className="text-[14px] leading-[1.4] font-semibold transition-colors duration-[450ms]"
-                    style={{ color: on || done ? "#E8ECF4" : "#9BA5B9" }}
-                  >
-                    {label}
-                  </div>
-                  {code && <div className="mt-[7px] font-mono text-[11.5px] text-cyan-light">{code}</div>}
-                </div>
-              </div>
-            );
-          })}
+    <Part id="rcm" label="Revenue Cycle" className="pb-16">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-end">
+        <Heading>End-to-End Revenue Cycle Management (RCM)</Heading>
+        <div className="space-y-3 text-[16px] leading-[1.65] text-graphite">
+          <p className="m-0">
+            We provide comprehensive Revenue Cycle Management services designed to optimize the complete financial
+            lifecycle of healthcare organizations—from patient registration and insurance verification to claim
+            submission, payment posting, denial management, and accounts receivable follow-up.
+          </p>
+          <p className="m-0">
+            Our RCM services combine healthcare operational expertise, technology, EDI workflows, and revenue-cycle
+            analytics to help practices improve collections, reduce claim delays, and maintain greater visibility into
+            their financial performance.
+          </p>
         </div>
       </div>
-    </section>
+
+      <div className="mt-8 grid border-t-2 border-l border-form lg:grid-cols-2">
+        {cols.map((col, c) => (
+          <table key={c} className="w-full border-collapse">
+            {/* the second column repeats the header only when it sits beside the first */}
+            <thead className={c === 1 ? "max-lg:hidden" : ""}>
+                <tr className="caption text-left">
+                  <th className="w-12 border-r border-b border-form px-3 py-2 font-normal">24.</th>
+                  <th className="border-r border-b border-form px-3 py-2 font-normal">Our RCM Services Include</th>
+                  <th className="w-[120px] border-r border-b border-form px-3 py-2 font-normal">EDI transaction</th>
+                </tr>
+            </thead>
+            <tbody>
+              {col.map(([label, code], i) => {
+                const n = c * half + i + 1;
+                return (
+                  <tr key={label} className="align-top hover:bg-form-tint">
+                    <td className="border-r border-b border-form px-3 py-3 font-mono text-[13px] text-form">{String(n).padStart(2, "0")}</td>
+                    <td className="border-r border-b border-form px-3 py-3 text-[15px] leading-[1.4] font-semibold text-ink">{label}</td>
+                    <td className="border-r border-b border-form px-3 py-3 font-mono text-[12.5px] text-ink">{code ?? ""}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ))}
+      </div>
+    </Part>
   );
 }

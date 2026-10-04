@@ -1,34 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans } from "next/font/google";
-import { Motion, motionInitScript } from "@/components/Motion";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"], variable: "--font-outfit" });
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-jakarta" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains" });
+const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo" });
+const plex = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex" });
 
 export const metadata: Metadata = {
   title: "AlphaNet Solutions — Software & Healthcare Technology",
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#04050a" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#fcfdfc" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-      className={`${outfit.variable} ${jakarta.variable} ${jetbrains.variable}`}
-    >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: motionInitScript }} />
-      </head>
+    <html lang="en" data-scroll-behavior="smooth" className={`${archivo.variable} ${plex.variable}`}>
       <body>
-        <Motion />
-        <div className="relative min-h-screen overflow-x-clip bg-bg">
+        <div className="min-h-screen overflow-x-clip">
           <SiteHeader />
           {children}
           <SiteFooter />
