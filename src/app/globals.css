@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* Design tokens — design_handoff_alphanet_website/README.md § Design Tokens */
+@theme {
+  --font-display: var(--font-outfit), "Outfit", sans-serif;
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
+
+  --color-bg: #04050a;
+  --color-ink: #e8ecf4; /* text primary */
+  --color-strong: #f2f5fa;
+  --color-body: #a3adc0;
+  --color-body-2: #a9b2c4;
+  --color-muted: #98a2b6;
+  --color-subtle: #7e89a0;
+  --color-faint: #5b657a;
+  --color-soft: #c3cbda;
+  --color-dim: #8a94a8;
+  --color-on-accent: #04070e;
+
+  --color-cyan: #00f0ff;
+  --color-cyan-light: #8ff6ff;
+  --color-cyan-hover: #7df9ff;
+  --color-indigo: #6c4df6;
+  --color-violet: #8b7cff;
+  --color-purple: #c77dff;
+  --color-success: #06d6a0;
+
+  --animate-pulse-dot: anPulse 1.8s ease-in-out infinite;
+}
+
+@utility px-gutter {
+  padding-inline: clamp(18px, 4vw, 56px);
+}
+@utility py-section {
+  padding-block: clamp(64px, 8vw, 124px);
+}
+@utility container-site {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+@utility text-gradient {
+  background: linear-gradient(100deg, #00f0ff 10%, #8b7cff 55%, #c77dff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility field {
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(4, 6, 14, 0.6);
+  color: #e8ecf4;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  outline: none;
+  &:focus {
+    border-color: rgba(0, 240, 255, 0.55);
+  }
+  &::placeholder {
+    color: #5b657a;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #04050a;
+    color: #e8ecf4;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  a {
+    color: #00f0ff;
+    text-decoration: none;
+  }
+  a:hover {
+    color: #7df9ff;
+  }
+  ::selection {
+    background: rgba(0, 240, 255, 0.3);
+  }
+  select option {
+    background: #0a0d1a;
+    color: #e8ecf4;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Scroll reveal: hidden before first paint (class set by inline head script), revealed by <Motion/>. */
+.an-js [data-reveal]:not([data-shown]),
+.an-js [data-stagger] > :not([data-shown]) {
+  opacity: 0;
+}
+
+@keyframes anFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes anPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes anSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes anSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes anMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes anFill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes anIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes anRing {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
